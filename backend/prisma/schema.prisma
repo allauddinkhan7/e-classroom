@@ -4,9 +4,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
 }
-
 
 enum Role {
   TEACHER
@@ -25,16 +23,16 @@ enum EnrollmentRole {
 }
 
 model User {
-  id            String   @id @default(uuid())
-  email         String   @unique
-  passwordHash  String
-  fullName      String
-  role          Role
-  avatarFileId  String?
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String
+  fullName     String
+  role         Role
+  avatarFileId String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
-  createdClassrooms     Classroom[]          @relation("ClassroomCreator")
+  createdClassrooms     Classroom[]               @relation("ClassroomCreator")
   enrollments           Enrollment[]
   submissions           Submission[]
   groupMemberships      GroupMember[]
@@ -52,13 +50,13 @@ model Classroom {
   creator   User          @relation("ClassroomCreator", fields: [createdBy], references: [id])
   createdAt DateTime      @default(now())
 
-  enrollments  Enrollment[]
-  assignments  Assignment[]
-  materials    Material[]
-  groups       Group[]
-  notes        Note[]
-  messages     Message[]
-  meetings     Meeting[]
+  enrollments Enrollment[]
+  assignments Assignment[]
+  materials   Material[]
+  groups      Group[]
+  notes       Note[]
+  messages    Message[]
+  meetings    Meeting[]
 }
 
 model Enrollment {
@@ -88,12 +86,12 @@ model Assignment {
 }
 
 model Submission {
-  id            String    @id @default(uuid())
+  id            String   @id @default(uuid())
   assignmentId  String
   userId        String
   fileId        String?
   obtainedMarks Int?
-  submittedAt   DateTime  @default(now())
+  submittedAt   DateTime @default(now())
 
   assignment Assignment @relation(fields: [assignmentId], references: [id])
   user       User       @relation(fields: [userId], references: [id])
@@ -122,7 +120,7 @@ model Note {
 }
 
 model Group {
-  id          String   @id @default(uuid())
+  id          String @id @default(uuid())
   classroomId String
   name        String
 
@@ -156,7 +154,7 @@ model ConversationParticipant {
   userId         String
 
   conversation Conversation @relation(fields: [conversationId], references: [id])
-  user         User          @relation(fields: [userId], references: [id])
+  user         User         @relation(fields: [userId], references: [id])
 
   @@unique([conversationId, userId])
 }
@@ -175,10 +173,10 @@ model Message {
 }
 
 model Meeting {
-  id             String   @id @default(uuid())
+  id             String    @id @default(uuid())
   classroomId    String?
   conversationId String?
-  startedAt      DateTime @default(now())
+  startedAt      DateTime  @default(now())
   endedAt        DateTime?
 
   classroom    Classroom?    @relation(fields: [classroomId], references: [id])
@@ -190,19 +188,19 @@ model Meeting {
 }
 
 model MeetingParticipant {
-  id       String    @id @default(uuid())
+  id        String    @id @default(uuid())
   meetingId String
-  userId   String
-  joinedAt DateTime  @default(now())
-  leftAt   DateTime?
+  userId    String
+  joinedAt  DateTime  @default(now())
+  leftAt    DateTime?
 
   meeting Meeting @relation(fields: [meetingId], references: [id])
   user    User    @relation(fields: [userId], references: [id])
 }
 
 model AttendanceCheck {
-  id         String   @id @default(uuid())
-  meetingId  String
+  id          String   @id @default(uuid())
+  meetingId   String
   triggeredAt DateTime @default(now())
 
   meeting   Meeting              @relation(fields: [meetingId], references: [id])
@@ -221,11 +219,11 @@ model AttendanceResponse {
 }
 
 model PopQuestion {
-  id         String   @id @default(uuid())
-  meetingId  String
-  question   String
-  answer     String
-  askedAt    DateTime @default(now())
+  id        String   @id @default(uuid())
+  meetingId String
+  question  String
+  answer    String
+  askedAt   DateTime @default(now())
 
   meeting   Meeting            @relation(fields: [meetingId], references: [id])
   responses QuestionResponse[]
@@ -244,13 +242,13 @@ model QuestionResponse {
 }
 
 model Notification {
-  id          String   @id @default(uuid())
-  userId      String
-  type        String
-  content     String
+  id           String    @id @default(uuid())
+  userId       String
+  type         String
+  content      String
   deliveredVia String
-  readAt      DateTime?
-  createdAt   DateTime @default(now())
+  readAt       DateTime?
+  createdAt    DateTime  @default(now())
 
   user User @relation(fields: [userId], references: [id])
 }
