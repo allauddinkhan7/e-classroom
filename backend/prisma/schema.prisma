@@ -1,0 +1,256 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+
+enum Role {
+  TEACHER
+  STUDENT
+  ADMIN
+}
+
+enum ClassroomType {
+  COURSE
+  STUDY_GROUP
+}
+
+enum EnrollmentRole {
+  MEMBER
+  HOST
+}
+
+model User {
+  id            String   @id @default(uuid())
+  email         String   @unique
+  passwordHash  String
+  fullName      String
+  role          Role
+  avatarFileId  String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  createdClassrooms     Classroom[]          @relation("ClassroomCreator")
+  enrollments           Enrollment[]
+  submissions           Submission[]
+  groupMemberships      GroupMember[]
+  conversationsJoined   ConversationParticipant[]
+  messagesSent          Message[]
+  meetingParticipations MeetingParticipant[]
+  notifications         Notification[]
+}
+
+model Classroom {
+  id        String        @id @default(uuid())
+  name      String
+  type      ClassroomType
+  createdBy String
+  creator   User          @relation("ClassroomCreator", fields: [createdBy], references: [id])
+  createdAt DateTime      @default(now())
+
+  enrollments  Enrollment[]
+  assignments  Assignment[]
+  materials    Material[]
+  groups       Group[]
+  notes        Note[]
+  messages     Message[]
+  meetings     Meeting[]
+}
+
+model Enrollment {
+  id          String         @id @default(uuid())
+  userId      String
+  classroomId String
+  roleInClass EnrollmentRole @default(MEMBER)
+  joinedAt    DateTime       @default(now())
+
+  user      User      @relation(fields: [userId], references: [id])
+  classroom Classroom @relation(fields: [classroomId], references: [id])
+
+  @@unique([userId, classroomId])
+}
+
+model Assignment {
+  id          String   @id @default(uuid())
+  classroomId String
+  title       String
+  description String?
+  totalMarks  Int
+  dueAt       DateTime
+  createdAt   DateTime @default(now())
+
+  classroom   Classroom    @relation(fields: [classroomId], references: [id])
+  submissions Submission[]
+}
+
+model Submission {
+  id            String    @id @default(uuid())
+  assignmentId  String
+  userId        String
+  fileId        String?
+  obtainedMarks Int?
+  submittedAt   DateTime  @default(now())
+
+  assignment Assignment @relation(fields: [assignmentId], references: [id])
+  user       User       @relation(fields: [userId], references: [id])
+
+  @@unique([assignmentId, userId])
+}
+
+model Material {
+  id          String   @id @default(uuid())
+  classroomId String
+  title       String
+  fileId      String?
+  postedAt    DateTime @default(now())
+
+  classroom Classroom @relation(fields: [classroomId], references: [id])
+}
+
+model Note {
+  id          String   @id @default(uuid())
+  classroomId String
+  userId      String
+  content     String
+  createdAt   DateTime @default(now())
+
+  classroom Classroom @relation(fields: [classroomId], references: [id])
+}
+
+model Group {
+  id          String   @id @default(uuid())
+  classroomId String
+  name        String
+
+  classroom Classroom     @relation(fields: [classroomId], references: [id])
+  members   GroupMember[]
+}
+
+model GroupMember {
+  id      String @id @default(uuid())
+  groupId String
+  userId  String
+
+  group Group @relation(fields: [groupId], references: [id])
+  user  User  @relation(fields: [userId], references: [id])
+
+  @@unique([groupId, userId])
+}
+
+model Conversation {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+
+  participants ConversationParticipant[]
+  messages     Message[]
+  meetings     Meeting[]
+}
+
+model ConversationParticipant {
+  id             String @id @default(uuid())
+  conversationId String
+  userId         String
+
+  conversation Conversation @relation(fields: [conversationId], references: [id])
+  user         User          @relation(fields: [userId], references: [id])
+
+  @@unique([conversationId, userId])
+}
+
+model Message {
+  id             String   @id @default(uuid())
+  senderId       String
+  classroomId    String?
+  conversationId String?
+  content        String
+  sentAt         DateTime @default(now())
+
+  sender       User          @relation(fields: [senderId], references: [id])
+  classroom    Classroom?    @relation(fields: [classroomId], references: [id])
+  conversation Conversation? @relation(fields: [conversationId], references: [id])
+}
+
+model Meeting {
+  id             String   @id @default(uuid())
+  classroomId    String?
+  conversationId String?
+  startedAt      DateTime @default(now())
+  endedAt        DateTime?
+
+  classroom    Classroom?    @relation(fields: [classroomId], references: [id])
+  conversation Conversation? @relation(fields: [conversationId], references: [id])
+
+  participants     MeetingParticipant[]
+  attendanceChecks AttendanceCheck[]
+  popQuestions     PopQuestion[]
+}
+
+model MeetingParticipant {
+  id       String    @id @default(uuid())
+  meetingId String
+  userId   String
+  joinedAt DateTime  @default(now())
+  leftAt   DateTime?
+
+  meeting Meeting @relation(fields: [meetingId], references: [id])
+  user    User    @relation(fields: [userId], references: [id])
+}
+
+model AttendanceCheck {
+  id         String   @id @default(uuid())
+  meetingId  String
+  triggeredAt DateTime @default(now())
+
+  meeting   Meeting              @relation(fields: [meetingId], references: [id])
+  responses AttendanceResponse[]
+}
+
+model AttendanceResponse {
+  id                String   @id @default(uuid())
+  attendanceCheckId String
+  userId            String
+  respondedAt       DateTime @default(now())
+
+  attendanceCheck AttendanceCheck @relation(fields: [attendanceCheckId], references: [id])
+
+  @@unique([attendanceCheckId, userId])
+}
+
+model PopQuestion {
+  id         String   @id @default(uuid())
+  meetingId  String
+  question   String
+  answer     String
+  askedAt    DateTime @default(now())
+
+  meeting   Meeting            @relation(fields: [meetingId], references: [id])
+  responses QuestionResponse[]
+}
+
+model QuestionResponse {
+  id            String   @id @default(uuid())
+  popQuestionId String
+  userId        String
+  answer        String
+  respondedAt   DateTime @default(now())
+
+  popQuestion PopQuestion @relation(fields: [popQuestionId], references: [id])
+
+  @@unique([popQuestionId, userId])
+}
+
+model Notification {
+  id          String   @id @default(uuid())
+  userId      String
+  type        String
+  content     String
+  deliveredVia String
+  readAt      DateTime?
+  createdAt   DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+}
