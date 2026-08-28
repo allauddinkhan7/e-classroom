@@ -1,0 +1,18 @@
+services:
+  postgres:
+    image: postgres:16  # Docker downloads the official PostgreSQL 16 image and uses it to create the container So you don't need to manually install PostgreSQL 16.
+    container_name: eclassroom-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: eclassroom
+      POSTGRES_PASSWORD: eclassroom_dev_password
+      POSTGRES_DB: eclassroom
+      # ports: maps the container's port 5432 to your machine's port 5432 so tools outside Docker (like Prisma) can reach it
+    ports:
+      - "5432:5432"
+      # data persist so stopping/restarting the container doesn't wipe your database
+    volumes: 
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:

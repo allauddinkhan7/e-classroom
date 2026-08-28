@@ -23,14 +23,16 @@ enum EnrollmentRole {
 }
 
 model User {
-  id           String   @id @default(uuid())
-  email        String   @unique
-  passwordHash String
-  fullName     String
-  role         Role
-  avatarFileId String?
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id            String   @id @default(uuid())
+  email         String   @unique
+  passwordHash  String
+  fullName      String
+  role          Role
+  avatarFileId  String?
+  avatarFile    File?    @relation("UserAvatar", fields: [avatarFileId], references: [id])
+  uploadedFiles File[]   @relation("FileUploader")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
   createdClassrooms     Classroom[]               @relation("ClassroomCreator")
   enrollments           Enrollment[]
@@ -90,6 +92,7 @@ model Submission {
   assignmentId  String
   userId        String
   fileId        String?
+  file          File?    @relation(fields: [fileId], references: [id])
   obtainedMarks Int?
   submittedAt   DateTime @default(now())
 
@@ -104,6 +107,7 @@ model Material {
   classroomId String
   title       String
   fileId      String?
+  file        File?    @relation(fields: [fileId], references: [id])
   postedAt    DateTime @default(now())
 
   classroom Classroom @relation(fields: [classroomId], references: [id])
@@ -251,4 +255,21 @@ model Notification {
   createdAt    DateTime  @default(now())
 
   user User @relation(fields: [userId], references: [id])
+}
+
+model File {
+  id           String   @id @default(uuid())
+  uploadedBy   String
+  bucket       String
+  storageKey   String
+  originalName String
+  mimeType     String
+  sizeBytes    Int
+  createdAt    DateTime @default(now())
+
+  uploader User @relation("FileUploader", fields: [uploadedBy], references: [id])
+
+  usedAsAvatarBy User[]       @relation("UserAvatar")
+  submissions    Submission[]
+  materials      Material[]
 }
