@@ -9,7 +9,7 @@ export default function Home() {
           <CardTitle>E-Classroom</CardTitle>
         </CardHeader>
         <CardContent>
-          <Button>It&apos;s working</Button>
+          <Button>It&apos;s working....</Button>
         </CardContent>
       </Card>
     </main>
