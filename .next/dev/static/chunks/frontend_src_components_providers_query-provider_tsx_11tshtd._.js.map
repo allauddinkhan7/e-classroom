@@ -1,0 +1,6 @@
+{
+  "version": 3,
+  "sources": [],
+  "sections": [
+    {"offset": {"line": 4, "column": 0}, "map": {"version":3,"sources":["file:///home/bahl/Music/practice/e-classroom/frontend/src/components/providers/query-provider.tsx"],"sourcesContent":["\"use client\";\n\nimport { useState } from \"react\";\nimport { QueryClient, QueryClientProvider } from \"@tanstack/react-query\";\n\nexport function QueryProvider({ children }: { children: React.ReactNode }) {\n  const [queryClient] = useState(\n    () =>\n      new QueryClient({\n        defaultOptions: {\n          queries: {\n            staleTime: 60 * 1000, // 1 minute — data is considered fresh for this long before refetching\n            retry: 1,\n          },\n        },\n      }),\n  );\n\n  return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>;\n}"],"names":["QueryProvider","children","queryClient","defaultOptions","queries","staleTime","retry","client"],"mappings":";;;;;AAEA;AACA;AAAA;;;AAHA;;;AAKO,SAASA,cAAc,EAAEC,QAAQ,EAAiC;;IACvE,MAAM,CAACC,YAAY,GAAG,IAAA,qLAAQ;kCAC5B,IACE,IAAI,2MAAW,CAAC;gBACdC,gBAAgB;oBACdC,SAAS;wBACPC,WAAW,KAAK;wBAChBC,OAAO;oBACT;gBACF;YACF;;IAGJ,qBAAO,yMAAC,4NAAmB;QAACC,QAAQL;kBAAcD;;;;;;AACpD;GAdgBD;KAAAA"}}]
+}
