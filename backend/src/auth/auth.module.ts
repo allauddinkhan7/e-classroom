@@ -4,17 +4,21 @@ import { AuthController } from "./auth.controller";
 import { UsersModule } from "../users/users.module";
 import { JwtModule } from "@nestjs/jwt";
 import { RedisModule } from "../redis/redis.module";
+import { PassportModule } from "@nestjs/passport";
+import { JwtStrategy } from "./jwt.strategy";
 
 @Module({
   imports: [
     UsersModule,
     RedisModule,
+    PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.register({
       secret: process.env.JWT_SECRET,
     }),
   ],
   
   controllers: [AuthController],
-  providers: [AuthService], 
+  providers: [AuthService, JwtStrategy],
+  exports: [JwtStrategy, PassportModule],
 })
 export class AuthModule {}
