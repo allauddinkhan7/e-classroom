@@ -5,9 +5,10 @@ import { UsersModule } from "../users/users.module";
 import { AuthModule } from "../auth/auth.module";
 import { RedisModule } from "../redis/redis.module";
 import { ClassroomModule } from "../classrooms/classrooms.module";
+import { AssignmentsModule } from "../assignments/assignments.module";
 
 @Module({
-  imports: [PrismaModule, RedisModule, UsersModule, AuthModule, ClassroomModule],
+  imports: [PrismaModule, RedisModule, UsersModule, AuthModule, ClassroomModule, AssignmentsModule],
   controllers: [AppController],
 })
 export class AppModule {}
