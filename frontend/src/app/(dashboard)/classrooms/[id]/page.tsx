@@ -9,6 +9,7 @@ import { useCurrentUser } from "@/lib/auth/use-current-user";
 import { AddStudentsDialog } from "@/components/classrooms/add-students-dialog";
 import { AssignmentsSection } from "@/components/assignments/assignments-section";
 import { EditClassroomDialog } from "@/components/classrooms/edit-classroom-dialog";
+import { MaterialsSection } from "@/components/materials/materials-section";
 
 export default function ClassroomDetailPage() {
   const params = useParams<{ id: string }>();
@@ -91,6 +92,7 @@ export default function ClassroomDetailPage() {
           ))}
         </div>
         <AssignmentsSection classroomId={classroom.id} isTeacher={canManageMembers} />
+        <MaterialsSection classroomId={classroom.id} isTeacher={canManageMembers} />
       </div>
     </div>
   );

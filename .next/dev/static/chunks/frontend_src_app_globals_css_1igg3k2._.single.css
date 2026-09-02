@@ -74,8 +74,6 @@
 @layer theme {
   :root, :host {
     --font-sans: var(--font-sans);
-    --color-green-200: #b9f8cf;
-    --color-green-700: #008138;
     --color-slate-400: #90a1b9;
     --color-slate-500: #62748e;
     --color-slate-900: #0f172b;
@@ -114,8 +112,6 @@
 
   @supports (color: lab(0% 0 0)) {
     :root, :host {
-      --color-green-200: lab(92.4222% -26.4702 12.9427);
-      --color-green-700: lab(47.0329% -47.0239 31.4788);
       --color-slate-400: lab(65.5349% -2.25151 -14.5072);
       --color-slate-500: lab(48.0876% -2.03595 -16.5814);
       --color-slate-900: lab(7.78673% 1.82345 -15.0537);
@@ -664,6 +660,10 @@
     min-height: calc(var(--spacing) * 16);
   }
 
+  .min-h-\[100px\] {
+    min-height: 100px;
+  }
+
   .min-h-\[120px\] {
     min-height: 120px;
   }
@@ -907,6 +907,12 @@
     margin-block: 0;
   }
 
+  :where(.space-y-0\.5 > :not(:last-child)) {
+    --tw-space-y-reverse: 0;
+    margin-block-start: calc(calc(var(--spacing) * .5) * var(--tw-space-y-reverse));
+    margin-block-end: calc(calc(var(--spacing) * .5) * calc(1 - var(--tw-space-y-reverse)));
+  }
+
   :where(.space-y-1 > :not(:last-child)) {
     --tw-space-y-reverse: 0;
     margin-block-start: calc(var(--spacing) * var(--tw-space-y-reverse));
@@ -975,10 +981,6 @@
 
   .overflow-y-auto {
     overflow-y: auto;
-  }
-
-  .rounded {
-    border-radius: .25rem;
   }
 
   .rounded-\(--cell-radius\) {
@@ -1077,14 +1079,6 @@
 
   .border-border {
     border-color: var(--border);
-  }
-
-  .border-green-200 {
-    border-color: var(--color-green-200);
-  }
-
-  .border-green-700 {
-    border-color: var(--color-green-700);
   }
 
   .border-input {
@@ -1816,7 +1810,7 @@
       }
     }
 
-    .hover\:bg-secondary:hover, .hover\:bg-secondary\/50:hover {
+    .hover\:bg-secondary\/50:hover {
       background-color: var(--secondary);
     }
 
@@ -1824,6 +1818,10 @@
       .hover\:bg-secondary\/50:hover {
         background-color: color-mix(in oklab, var(--secondary) 50%, transparent);
       }
+    }
+
+    .hover\:text-destructive:hover {
+      color: var(--destructive);
     }
 
     .hover\:text-foreground:hover {

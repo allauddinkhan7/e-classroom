@@ -71,10 +71,8 @@ export class AssignmentsService {
     });
   }
 
-  // findAssignmentForEdit
   async findAssignmentForEdit(userId: string, assignmentId: string) {
     // await this.assertIsMember(userId, assignmentId);
-    console.log("findAssignmentForEdit");
     return this.prisma.assignment.findUnique({
       where: { id: assignmentId },
       include: {
