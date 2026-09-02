@@ -41,7 +41,7 @@ export function TopBar() {
           <Avatar className="h-7 w-7">
             <AvatarFallback className="text-xs">{initials}</AvatarFallback>
           </Avatar>
-          <span className="hidden text-sm sm:inline">{user?.email}</span>
+          {/* <span className="hidden text-sm sm:inline">{user?.fullName}</span> */}
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuItem disabled className="text-xs text-muted-foreground">

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { jwtDecode } from "jwt-decode";
 
 type CurrentUser = {
+  fullName: string;
   userId: string;
   email: string;
   role: "STUDENT" | "TEACHER" | "ADMIN";
@@ -21,8 +22,8 @@ export function useCurrentUser() {
       return;
     }
     try {
-      const decoded = jwtDecode<{ sub: string; email: string; role: string }>(token);
-      setUser({ userId: decoded.sub, email: decoded.email, role: decoded.role as CurrentUser["role"] });
+      const decoded = jwtDecode<{ fullName: string; sub: string; email: string; role: string }>(token);
+      setUser({ fullName: decoded.fullName, userId: decoded.sub, email: decoded.email, role: decoded.role as CurrentUser["role"] });
     } catch {
       setUser(null);
     } finally {

@@ -1,19 +1,23 @@
 import { IsString, MinLength, IsInt, Min, IsDateString, IsOptional } from 'class-validator';
 
-export class CreateAssignmentDto {
+export class UpdateAssignmentDto {
+  @IsOptional()
   @IsString()
   @MinLength(2)
-  title!: string;
+  title?: string;
 
+  @IsOptional()
   @IsString()
   description?: string;
 
+  @IsOptional()
   @IsInt()
   @Min(1)
-  totalMarks!: number;
+  totalMarks?: number;
 
+  @IsOptional()
   @IsDateString()
-  dueAt!: string;
+  dueAt?: string;
 
   @IsOptional()
   @IsString()

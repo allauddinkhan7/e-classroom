@@ -15,14 +15,14 @@ import { useCurrentUser } from "@/lib/auth/use-current-user";
 
 const studentNav = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/classrooms", label: "My Classrooms", icon: BookOpen },
+  { href: "/classrooms", label: "Classrooms", icon: BookOpen },
   { href: "/messages", label: "Messages", icon: MessageSquare },
   { href: "/notifications", label: "Notifications", icon: Bell },
 ];
 
 const teacherNav = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/classrooms", label: "My Classrooms", icon: BookOpen },
+  { href: "/classrooms", label: "Classrooms", icon: BookOpen },
   { href: "/students", label: "Students", icon: Users },
   { href: "/messages", label: "Messages", icon: MessageSquare },
   { href: "/notifications", label: "Notifications", icon: Bell },

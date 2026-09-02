@@ -3,6 +3,8 @@ import { PrismaService } from '../prisma/prisma.service';
 import { ClassroomType } from '@prisma/client';
 import { CreateAssignmentDto } from './dto/create-assignment.dto';
 import { GradeSubmissionDto } from './dto/grade-submission.dto';
+import { SubmitAssignmentDto } from './dto/submit-assignment.dto';
+import { UpdateAssignmentDto } from './dto/update-assignment.dto';
 
 @Injectable()
 export class AssignmentsService {
@@ -17,18 +19,25 @@ export class AssignmentsService {
       where: { userId_classroomId: { userId, classroomId } },
     });
     if (!enrollment) {
-      throw new ForbiddenException('You are not a member of this classroom');
+      throw new ForbiddenException("You are not a member of this classroom");
     }
     return enrollment;
   }
 
   async create(userId: string, classroomId: string, dto: CreateAssignmentDto) {
-    const classroom = await this.prisma.classroom.findUnique({ where: { id: classroomId } });
+    const classroom = await this.prisma.classroom.findUnique({
+      where: { id: classroomId },
+    });
     if (!classroom) {
-      throw new NotFoundException('Classroom not found');
+      throw new NotFoundException("Classroom not found");
     }
-    if (classroom.type !== ClassroomType.COURSE || classroom.createdBy !== userId) {
-      throw new ForbiddenException('Only the teacher of this course can create assignments');
+    if (
+      classroom.type !== ClassroomType.COURSE ||
+      classroom.createdBy !== userId
+    ) {
+      throw new ForbiddenException(
+        "Only the teacher of this course can create assignments",
+      );
     }
 
     return this.prisma.assignment.create({
@@ -38,6 +47,10 @@ export class AssignmentsService {
         description: dto.description,
         totalMarks: dto.totalMarks,
         dueAt: new Date(dto.dueAt),
+        fileId: dto.fileId,
+      },
+      include: {
+        file: { select: { id: true, originalName: true, mimeType: true } },
       },
     });
   }
@@ -48,36 +61,62 @@ export class AssignmentsService {
     return this.prisma.assignment.findMany({
       where: { classroomId },
       include: {
-        submissions: { where: { userId }, select: { id: true, obtainedMarks: true, submittedAt: true } },
+        file: { select: { id: true, originalName: true, mimeType: true } },
+        submissions: {
+          where: { userId },
+          select: { id: true, obtainedMarks: true, submittedAt: true },
+        },
       },
-      orderBy: { dueAt: 'asc' },
+      orderBy: { dueAt: "asc" },
+    });
+  }
+
+  // findAssignmentForEdit
+  async findAssignmentForEdit(userId: string, assignmentId: string) {
+    // await this.assertIsMember(userId, assignmentId);
+    console.log("findAssignmentForEdit");
+    return this.prisma.assignment.findUnique({
+      where: { id: assignmentId },
+      include: {
+        file: { select: { id: true, originalName: true, mimeType: true } },
+        submissions: {
+          where: { userId },
+          select: { id: true, obtainedMarks: true, submittedAt: true },
+        },
+      },
     });
   }
 
   /*
     submit blocks both late submissions and duplicate submissions server-side
   */
-  async submit(userId: string, assignmentId: string) {
-    const assignment = await this.prisma.assignment.findUnique({ where: { id: assignmentId } });
+  async submit(userId: string, assignmentId: string, dto: SubmitAssignmentDto) {
+    const assignment = await this.prisma.assignment.findUnique({
+      where: { id: assignmentId },
+    });
     if (!assignment) {
-      throw new NotFoundException('Assignment not found');
+      throw new NotFoundException("Assignment not found");
     }
 
     await this.assertIsMember(userId, assignment.classroomId);
 
     if (new Date() > assignment.dueAt) {
-      throw new BadRequestException('The due date for this assignment has passed');
+      throw new BadRequestException(
+        "The due date for this assignment has passed",
+      );
     }
 
     const existing = await this.prisma.submission.findUnique({
       where: { assignmentId_userId: { assignmentId, userId } },
     });
     if (existing) {
-      throw new BadRequestException('You have already submitted this assignment');
+      throw new BadRequestException(
+        "You have already submitted this assignment",
+      );
     }
 
     return this.prisma.submission.create({
-      data: { assignmentId, userId },
+      data: { assignmentId, userId, fileId: dto.fileId },
     });
   }
 
@@ -87,31 +126,42 @@ export class AssignmentsService {
       include: { classroom: true },
     });
     if (!assignment) {
-      throw new NotFoundException('Assignment not found');
+      throw new NotFoundException("Assignment not found");
     }
     if (assignment.classroom.createdBy !== requesterId) {
-      throw new ForbiddenException('Only the teacher of this course can view submissions');
+      throw new ForbiddenException(
+        "Only the teacher of this course can view submissions",
+      );
     }
 
     return this.prisma.submission.findMany({
       where: { assignmentId },
-      include: { user: { select: { id: true, fullName: true, email: true } } },
-      orderBy: { submittedAt: 'asc' },
+      include: {
+        user: { select: { id: true, fullName: true, email: true } },
+        file: { select: { id: true, originalName: true } },
+      },
+      orderBy: { submittedAt: "asc" },
     });
   }
   /*
     grade validates marks can't exceed the assignment's total, catching an obvious data-integrity mistake before it reaches the database.
   */
-  async grade(requesterId: string, submissionId: string, dto: GradeSubmissionDto) {
+  async grade(
+    requesterId: string,
+    submissionId: string,
+    dto: GradeSubmissionDto,
+  ) {
     const submission = await this.prisma.submission.findUnique({
       where: { id: submissionId },
       include: { assignment: { include: { classroom: true } } },
     });
     if (!submission) {
-      throw new NotFoundException('Submission not found');
+      throw new NotFoundException("Submission not found");
     }
     if (submission.assignment.classroom.createdBy !== requesterId) {
-      throw new ForbiddenException('Only the teacher of this course can grade submissions');
+      throw new ForbiddenException(
+        "Only the teacher of this course can grade submissions",
+      );
     }
     if (dto.obtainedMarks > submission.assignment.totalMarks) {
       throw new BadRequestException(
@@ -122,6 +172,33 @@ export class AssignmentsService {
     return this.prisma.submission.update({
       where: { id: submissionId },
       data: { obtainedMarks: dto.obtainedMarks },
+    });
+  }
+
+  async update(requesterId: string, assignmentId: string, dto: UpdateAssignmentDto) {
+    const assignment = await this.prisma.assignment.findUnique({
+      where: { id: assignmentId },
+      include: { classroom: true },
+    });
+    if (!assignment) {
+      throw new NotFoundException("Assignment not found");
+    }
+    if (assignment.classroom.createdBy !== requesterId) {
+      throw new ForbiddenException("Only the teacher of this course can edit this assignment");
+    }
+
+    return this.prisma.assignment.update({
+      where: { id: assignmentId },
+      data: {
+        ...(dto.title !== undefined && { title: dto.title }),
+        ...(dto.description !== undefined && { description: dto.description }),
+        ...(dto.totalMarks !== undefined && { totalMarks: dto.totalMarks }),
+        ...(dto.dueAt !== undefined && { dueAt: new Date(dto.dueAt) }),
+        ...(dto.fileId !== undefined && { fileId: dto.fileId }),
+      },
+      include: {
+        file: { select: { id: true, originalName: true, mimeType: true } },
+      },
     });
   }
 }

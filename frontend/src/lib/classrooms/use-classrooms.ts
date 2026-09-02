@@ -8,6 +8,7 @@ import {
   fetchClassroom,
   fetchAvailableStudents,
   addMembersBulk,
+  updateClassroom,
 } from "./classrooms-api";
 
 export function useClassrooms() {
@@ -63,3 +64,16 @@ export function useAddMembersBulk(classroomId: string) {
     },
   });
 }
+
+ export function useUpdateClassroom() {
+    const queryClient = useQueryClient();
+    return useMutation({
+      mutationFn: ({ id, name }: { id: string; name: string }) => updateClassroom(id, name),
+      onSuccess: (_, variables) => {
+        queryClient.invalidateQueries({ queryKey: ["classrooms"] });
+        queryClient.invalidateQueries({ queryKey: ["classrooms", variables.id] });
+        toast.success("Classroom updated");
+      },
+      onError: () => toast.error("Couldn't update the classroom — please try again"),
+    });
+  }

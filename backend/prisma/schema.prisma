@@ -82,7 +82,8 @@ model Assignment {
   totalMarks  Int
   dueAt       DateTime
   createdAt   DateTime @default(now())
-
+  fileId      String?
+  file        File?    @relation(fields: [fileId], references: [id])
   classroom   Classroom    @relation(fields: [classroomId], references: [id])
   submissions Submission[]
 }
@@ -272,4 +273,5 @@ model File {
   usedAsAvatarBy User[]       @relation("UserAvatar")
   submissions    Submission[]
   materials      Material[]
+  assignments Assignment[]
 }

@@ -1,6 +1,6 @@
 services:
   postgres:
-    image: postgres:16  # Docker downloads the official PostgreSQL 16 image and uses it to create the container So you don't need to manually install PostgreSQL 16.
+    image: postgres:16 # Docker downloads the official PostgreSQL 16 image and uses it to create the container So you don't need to manually install PostgreSQL 16.
     container_name: eclassroom-postgres
     restart: unless-stopped
     environment:
@@ -11,7 +11,7 @@ services:
     ports:
       - "5432:5432"
       # data persist so stopping/restarting the container doesn't wipe your database
-    volumes: 
+    volumes:
       - postgres_data:/var/lib/postgresql/data
   redis:
     image: redis:7
@@ -21,7 +21,21 @@ services:
       - "6379:6379"
     volumes:
       - redis_data:/data
- 
+  minio:
+    image: minio/minio:latest
+    container_name: eclassroom-minio
+    restart: unless-stopped
+    ports:
+      - "9000:9000" # API port — this is what your backend talks to
+      - "9001:9001" # Web console — you'll browse files here in a browser
+    environment:
+      MINIO_ROOT_USER: eclassroom
+      MINIO_ROOT_PASSWORD: eclassroom_dev_password
+    volumes:
+      - minio_data:/data
+    command: server /data --console-address ":9001"
+    
 volumes:
   postgres_data:
   redis_data:
+  minio_data:

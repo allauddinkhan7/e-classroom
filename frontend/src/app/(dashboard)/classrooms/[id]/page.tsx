@@ -7,12 +7,14 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useClassroom } from "@/lib/classrooms/use-classrooms";
 import { useCurrentUser } from "@/lib/auth/use-current-user";
 import { AddStudentsDialog } from "@/components/classrooms/add-students-dialog";
+import { AssignmentsSection } from "@/components/assignments/assignments-section";
+import { EditClassroomDialog } from "@/components/classrooms/edit-classroom-dialog";
 
 export default function ClassroomDetailPage() {
   const params = useParams<{ id: string }>();
   const { user } = useCurrentUser();
   const { data: classroom, isLoading, isError } = useClassroom(params.id);
-
+  const canEdit = classroom?.creator.id === user?.userId;
   if (isLoading) {
     return (
       <div className="flex min-h-[300px] items-center justify-center">
@@ -37,10 +39,10 @@ export default function ClassroomDetailPage() {
   const canManageMembers = isCourse
     ? classroom.creator.id === user?.userId
     : myEnrollment?.roleInClass === "HOST";
-
+  
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+      <div className="flex flex-col  gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
             <h1 className="text-2xl font-semibold tracking-tight">{classroom.name}</h1>
@@ -53,9 +55,15 @@ export default function ClassroomDetailPage() {
             Created by {classroom.creator.fullName}
           </p>
         </div>
+        <div className="flex items-center gap-2 sm:flex-row sm:items-start">
+        {canEdit && <EditClassroomDialog classroomId={classroom.id} currentName={classroom.name} />}
+    
         {canManageMembers && (
           <AddStudentsDialog classroomId={classroom.id} classroomName={classroom.name} />
         )}
+
+        </div>
+        
       </div>
 
       <div className="space-y-3">
@@ -82,6 +90,7 @@ export default function ClassroomDetailPage() {
             </div>
           ))}
         </div>
+        <AssignmentsSection classroomId={classroom.id} isTeacher={canManageMembers} />
       </div>
     </div>
   );

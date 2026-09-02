@@ -51,7 +51,7 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    return this.issueTokens(user.id, user.email, user.role);
+    return this.issueTokens(user.fullName, user.id, user.email, user.role);
 
   }
 
@@ -71,12 +71,13 @@ export class AuthService {
     }
 
     const user = await this.usersService.findById(payload.sub);
+    
     if (!user) {
       throw new UnauthorizedException('User no longer exists');
     }
 
     // Rotate: invalidate the old refresh token, issue a brand new pair
-    return this.issueTokens(user.id, user.email, user.role);
+    return this.issueTokens(user.fullName, user.id, user.email, user.role);
   }
 
 
@@ -86,9 +87,9 @@ export class AuthService {
   }
 
 
-  private async issueTokens(userId: string, email: string, role: string) {
+  private async issueTokens(fullName: string,userId: string, email: string, role: string) {
     const accessToken = await this.jwtService.signAsync(
-      { sub: userId, email, role },
+      { fullName: fullName, sub: userId, email, role },
       { expiresIn: '15m' },
     );
 

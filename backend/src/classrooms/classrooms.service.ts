@@ -3,6 +3,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { ClassroomType, EnrollmentRole, Role } from '@prisma/client';
 import { CreateClassroomDto } from './dto/create-classroom.dto';
 import { AddMembersBulkDto } from './dto/add-members-bulk.dto';
+import { UpdateClassroomDto } from './dto/update-classroom.dto';
 
 @Injectable()
 export class ClassroomsService {
@@ -118,5 +119,31 @@ export class ClassroomsService {
     });
 
     return { added: result.count };
+  }
+
+
+  async update(requesterId: string, classroomId: string, dto: UpdateClassroomDto) {
+    const classroom = await this.prisma.classroom.findUnique({
+      where: { id: classroomId },
+      include: { enrollments: true },
+    });
+    if (!classroom) {
+      throw new NotFoundException('Classroom not found');
+    }
+
+    const requesterEnrollment = classroom.enrollments.find((e) => e.userId === requesterId);
+    const canEdit =
+      classroom.type === ClassroomType.COURSE
+        ? classroom.createdBy === requesterId
+        : requesterEnrollment?.roleInClass === EnrollmentRole.HOST;
+
+    if (!canEdit) {
+      throw new ForbiddenException('You do not have permission to edit this classroom');
+    }
+
+    return this.prisma.classroom.update({
+      where: { id: classroomId },
+      data: { ...(dto.name !== undefined && { name: dto.name }) },
+    });
   }
 }

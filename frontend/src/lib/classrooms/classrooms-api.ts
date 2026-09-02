@@ -50,3 +50,8 @@ export async function addMembersBulk(id: string, userIds: string[]) {
   });
   return res.data as { added: number };
 }
+
+export async function updateClassroom(id: string, name: string) {
+  const res = await apiClient.patch(`/classrooms/${id}`, { name });
+  return res.data as Classroom;
+}
