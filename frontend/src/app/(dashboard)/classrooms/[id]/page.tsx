@@ -10,6 +10,7 @@ import { AddStudentsDialog } from "@/components/classrooms/add-students-dialog";
 import { AssignmentsSection } from "@/components/assignments/assignments-section";
 import { EditClassroomDialog } from "@/components/classrooms/edit-classroom-dialog";
 import { MaterialsSection } from "@/components/materials/materials-section";
+import { NotesSection } from "@/components/notes/notes-section";
 
 export default function ClassroomDetailPage() {
   const params = useParams<{ id: string }>();
@@ -88,11 +89,12 @@ export default function ClassroomDetailPage() {
                   {isCourse ? "Teacher" : "Host"}
                 </Badge>
               )}
-            </div>
+            </div> 
           ))}
         </div>
         <AssignmentsSection classroomId={classroom.id} isTeacher={canManageMembers} />
         <MaterialsSection classroomId={classroom.id} isTeacher={canManageMembers} />
+        <NotesSection classroomId={classroom.id} />
       </div>
     </div>
   );

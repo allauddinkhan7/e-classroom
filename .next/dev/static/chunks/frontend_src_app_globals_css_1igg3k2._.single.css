@@ -660,6 +660,10 @@
     min-height: calc(var(--spacing) * 16);
   }
 
+  .min-h-\[80px\] {
+    min-height: 80px;
+  }
+
   .min-h-\[100px\] {
     min-height: 100px;
   }
@@ -864,6 +868,10 @@
 
   .justify-center {
     justify-content: center;
+  }
+
+  .justify-end {
+    justify-content: flex-end;
   }
 
   .gap-\(--card-spacing\) {
@@ -1083,6 +1091,10 @@
 
   .border-input {
     border-color: var(--input);
+  }
+
+  .border-primary {
+    border-color: var(--primary);
   }
 
   .border-transparent {
@@ -1365,6 +1377,10 @@
     white-space: nowrap;
   }
 
+  .whitespace-pre-wrap {
+    white-space: pre-wrap;
+  }
+
   .text-card-foreground {
     color: var(--card-foreground);
   }
@@ -1474,6 +1490,10 @@
     .ring-foreground\/10 {
       --tw-ring-color: color-mix(in oklab, var(--foreground) 10%, transparent);
     }
+  }
+
+  .ring-primary {
+    --tw-ring-color: var(--primary);
   }
 
   .outline-hidden {
@@ -1807,6 +1827,16 @@
     @supports (color: color-mix(in lab, red, red)) {
       .hover\:bg-primary\/80:hover {
         background-color: color-mix(in oklab, var(--primary) 80%, transparent);
+      }
+    }
+
+    .hover\:bg-secondary\/30:hover {
+      background-color: var(--secondary);
+    }
+
+    @supports (color: color-mix(in lab, red, red)) {
+      .hover\:bg-secondary\/30:hover {
+        background-color: color-mix(in oklab, var(--secondary) 30%, transparent);
       }
     }
 
@@ -2367,6 +2397,10 @@
 
     .sm\:justify-end {
       justify-content: flex-end;
+    }
+
+    .sm\:self-end {
+      align-self: flex-end;
     }
 
     .sm\:p-10 {
