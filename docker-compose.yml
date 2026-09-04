@@ -35,6 +35,20 @@ services:
       - minio_data:/data
     command: server /data --console-address ":9001"
     
+  livekit:
+    image: livekit/livekit-server:latest
+    container_name: eclassroom-livekit
+    restart: unless-stopped
+    ports:
+      - "7880:7880"   # HTTP/WebSocket — this is what your frontend connects to
+      - "7881:7881"   # TCP fallback for restrictive networks
+      - "51000-51100:51000-51100/udp"  # media (audio/video) traffic
+    environment:
+      LIVEKIT_KEYS: "eclassroom-key: 8dhCFATzqF3NwghA+WVoTXXu6PA0yNDTmzlR5gj2aEY="
+      LIVEKIT_RTC_PORT_RANGE_START: "51000"
+      LIVEKIT_RTC_PORT_RANGE_END: "51100"
+    command: --dev
+
 volumes:
   postgres_data:
   redis_data:
