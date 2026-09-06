@@ -25,7 +25,6 @@ export function AssignmentsSection({
   isTeacher: boolean;
 }) {
   const { data: assignments, isLoading, isError } = useAssignments(classroomId);
-  const submit = useSubmitAssignment(classroomId);
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
