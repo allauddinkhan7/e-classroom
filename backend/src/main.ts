@@ -7,10 +7,10 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
   app.enableCors({
-    origin: 'http://localhost:3000',
+    origin: '*',
     credentials: true,
   });
-  await app.listen(8000);
-  console.log("Backend running on http://localhost:8000");
+  await app.listen(8000, '0.0.0.0');
+  console.log("Backend running on http://*:8000");
 }
 bootstrap();

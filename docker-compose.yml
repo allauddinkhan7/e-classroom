@@ -41,19 +41,19 @@ services:
     restart: unless-stopped
     # for dev enviroment
     # for production everything goes to livekit.yaml
-    # ports:
-    #   - "7880:7880"   # HTTP/WebSocket — this is what your frontend connects to
-    #   - "7881:7881"   # TCP fallback for restrictive networks
-    #   - "51000-51100:51000-51100/udp"  # media (audio/video) traffic
-    # environment:
-    #   LIVEKIT_KEYS: "eclassroom-key: 8dhCFATzqF3NwghA+WVoTXXu6PA0yNDTmzlR5gj2aEY="
-    #   LIVEKIT_RTC_PORT_RANGE_START: "51000"
-    #   LIVEKIT_RTC_PORT_RANGE_END: "51100"
-    # command: --dev
+    ports:
+      - "7880:7880"   # HTTP/WebSocket — this is what your frontend connects to
+      - "7881:7881"   # TCP fallback for restrictive networks
+      - "51000-51100:51000-51100/udp"  # media (audio/video) traffic
+    environment:
+      LIVEKIT_KEYS: "eclassroom-key: 8dhCFATzqF3NwghA+WVoTXXu6PA0yNDTmzlR5gj2aEY="
+      LIVEKIT_RTC_PORT_RANGE_START: "51000"
+      LIVEKIT_RTC_PORT_RANGE_END: "51100"
+    command: --dev
     network_mode: "host"
-    volumes:
-      - ./livekit.yaml:/etc/livekit.yaml
-    command: --config /etc/livekit.yaml
+    # volumes:
+    #   - ./livekit.yaml:/etc/livekit.yaml
+    # command: --config /etc/livekit.yaml
 
   coturn:
     image: coturn/coturn:latest
@@ -62,6 +62,33 @@ services:
     network_mode: "host"
     volumes:
       - ./coturn/turnserver.conf:/etc/coturn/turnserver.conf
+
+  backend:
+    build:
+      context: ./backend
+    container_name: eclassroom-backend
+    restart: unless-stopped
+    env_file:
+      - .env
+    ports:
+      - "8000:8000"
+    depends_on:
+      - postgres
+      - redis
+      - minio
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
+        NEXT_PUBLIC_LIVEKIT_URL: ${NEXT_PUBLIC_LIVEKIT_URL}
+    container_name: eclassroom-frontend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
   
   
 
