@@ -1,71 +1,222 @@
 services:
+
+  # ============================================================
+  # PostgreSQL
+  # ============================================================
   postgres:
-    image: postgres:16 # Docker downloads the official PostgreSQL 16 image and uses it to create the container So you don't need to manually install PostgreSQL 16.
+    image: postgres:16
     container_name: eclassroom-postgres
     restart: unless-stopped
+
+    env_file:
+      - .env
+
     environment:
-      POSTGRES_USER: eclassroom
-      POSTGRES_PASSWORD: eclassroom_dev_password
-      POSTGRES_DB: eclassroom
-      # ports: maps the container's port 5432 to your machine's port 5432 so tools outside Docker (like Prisma) can reach it
-    ports:
-      - "5432:5432"
-      # data persist so stopping/restarting the container doesn't wipe your database
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - ./@Vol/postgres_data:/var/lib/postgresql/data
+
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+
+  # ============================================================
+  # Redis
+  # ============================================================
   redis:
     image: redis:7
     container_name: eclassroom-redis
     restart: unless-stopped
-    ports:
-      - "6379:6379"
+
+    env_file:
+      - .env
+
     volumes:
-      - redis_data:/data
+      - ./@Vol/redis_data:/data
+
+    command:
+      - redis-server
+      - --appendonly
+      - "yes"
+      - --requirepass
+      - ${REDIS_PASSWORD}
+
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "redis-cli",
+          "-a",
+          "${REDIS_PASSWORD}",
+          "ping"
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+
+  # ============================================================
+  # MinIO
+  # ============================================================
   minio:
     image: minio/minio:latest
     container_name: eclassroom-minio
     restart: unless-stopped
-    ports:
-      - "9000:9000" # API port — this is what your backend talks to
-      - "9001:9001" # Web console — you'll browse files here in a browser
+
+    env_file:
+      - .env
+
     environment:
-      MINIO_ROOT_USER: eclassroom
-      MINIO_ROOT_PASSWORD: eclassroom_dev_password
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+
     volumes:
-      - minio_data:/data
-    command: server /data --console-address ":9001"
-    
+      - ./@Vol/minio_data:/data
+
+    command:
+      server /data --console-address ":9001"
+
+    expose:
+      - "9000"
+      - "9001"
+
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "curl",
+          "-f",
+          "http://localhost:9000/minio/health/live"
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+
+  # ============================================================
+  # MinIO initialization
+  # ============================================================
+  minio-init:
+    image: minio/mc:latest
+    container_name: eclassroom-minio-init
+
+    env_file:
+      - .env
+
+    depends_on:
+      minio:
+        condition: service_healthy
+
+    entrypoint: >
+      /bin/sh -c "
+      mc alias set local http://minio:9000
+      ${MINIO_ROOT_USER}
+      ${MINIO_ROOT_PASSWORD} &&
+      mc mb --ignore-existing local/${MINIO_BUCKET}
+      "
+
+    restart: "no"
+
+
+  # ============================================================
+  # LiveKit
+  # ============================================================
   livekit:
     image: livekit/livekit-server:latest
     container_name: eclassroom-livekit
     restart: unless-stopped
-    # for dev enviroment
-    # for production everything goes to livekit.yaml
-    # ports:
-    #   - "7880:7880"   # HTTP/WebSocket — this is what your frontend connects to
-    #   - "7881:7881"   # TCP fallback for restrictive networks
-    #   - "51000-51100:51000-51100/udp"  # media (audio/video) traffic
-    # environment:
-    #   LIVEKIT_KEYS: "eclassroom-key: 8dhCFATzqF3NwghA+WVoTXXu6PA0yNDTmzlR5gj2aEY="
-    #   LIVEKIT_RTC_PORT_RANGE_START: "51000"
-    #   LIVEKIT_RTC_PORT_RANGE_END: "51100"
-    # command: --dev
-    network_mode: "host"
-    volumes:
-      - ./livekit.yaml:/etc/livekit.yaml
-    command: --config /etc/livekit.yaml
 
-  coturn:
-    image: coturn/coturn:latest
-    container_name: eclassroom-coturn
+    env_file:
+      - .env
+
+    volumes:
+      - ./@Vol/livekit.yaml:/etc/livekit.yaml:ro
+
+    command:
+      - --config
+      - /etc/livekit.yaml
+
+    ports:
+      - "7880:7880"
+      - "7881:7881"
+      - "51000-51100:51000-51100/udp"
+
+
+  # ============================================================
+  # NestJS Backend
+  # ============================================================
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+
+    container_name: eclassroom-backend
     restart: unless-stopped
-    network_mode: "host"
-    volumes:
-      - ./coturn/turnserver.conf:/etc/coturn/turnserver.conf
-  
-  
 
-volumes:
-  postgres_data:
-  redis_data:
-  minio_data:
+    env_file:
+      - .env
+
+    environment:
+      NODE_ENV: production
+
+      # Docker service names
+      REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379
+
+      MINIO_ENDPOINT: http://minio:9000
+
+      LIVEKIT_URL: ws://livekit:7880
+
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+      redis:
+        condition: service_healthy
+
+      minio-init:
+        condition: service_completed_successfully
+
+      livekit:
+        condition: service_started
+
+    expose:
+      - "8000"
+
+
+  # ============================================================
+  # Next.js Frontend
+  # ============================================================
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
+        NEXT_PUBLIC_LIVEKIT_URL: ${NEXT_PUBLIC_LIVEKIT_URL}
+
+    container_name: eclassroom-frontend
+    restart: unless-stopped
+
+    env_file:
+      - .env
+
+    environment:
+      NODE_ENV: production
+
+    depends_on:
+      backend:
+        condition: service_started
+
+    expose:
+      - "3000"
