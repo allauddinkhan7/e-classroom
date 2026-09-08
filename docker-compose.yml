@@ -21,6 +21,7 @@ services:
     container_name: eclassroom-minio
     restart: unless-stopped
     ports:
+      - "9002:9000"
       - "9001:9001" # Web console — you'll browse files here in a browser
     environment:
       MINIO_ROOT_USER: eclassroom
@@ -28,40 +29,26 @@ services:
     volumes:
       - minio_data:/data
     command: server /data --console-address ":9001"
-    
+
   livekit:
     image: livekit/livekit-server:latest
     container_name: eclassroom-livekit
     restart: unless-stopped
-    # for dev enviroment
-    # for production everything goes to livekit.yaml
-    ports:
-      - "7880:7880"   # HTTP/WebSocket — this is what your frontend connects to
-      - "7881:7881"   # TCP fallback for restrictive networks
-      - "51000-51100:51000-51100/udp"  # media (audio/video) traffic
-    environment:
-      LIVEKIT_KEYS: "eclassroom-key: 8dhCFATzqF3NwghA+WVoTXXu6PA0yNDTmzlR5gj2aEY="
-      LIVEKIT_RTC_PORT_RANGE_START: "51000"
-      LIVEKIT_RTC_PORT_RANGE_END: "51100"
-    command: --dev
+    volumes:
+      - ./livekit.yaml:/etc/livekit.yaml
+    command: --config /etc/livekit.yaml
     network_mode: "host"
     # volumes:
     #   - ./livekit.yaml:/etc/livekit.yaml
     # command: --config /etc/livekit.yaml
-
-  coturn:
-    image: coturn/coturn:latest
-    container_name: eclassroom-coturn
-    restart: unless-stopped
-    network_mode: "host"
-    volumes:
-      - ./coturn/turnserver.conf:/etc/coturn/turnserver.conf
 
   backend:
     build:
       context: ./backend
     container_name: eclassroom-backend
     restart: unless-stopped
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     env_file:
       - .env
     ports:

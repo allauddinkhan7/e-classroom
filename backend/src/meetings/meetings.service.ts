@@ -9,7 +9,7 @@ export class MeetingsService {
   constructor(private readonly prisma: PrismaService) {
     this.roomService = new RoomServiceClient(
       process.env
-        .LIVEKIT_URL!.replace("ws://", "http://")
+        .LIVEKIT_INTERNAL_URL!.replace("ws://", "http://")
         .replace("wss://", "https://"),
       process.env.LIVEKIT_API_KEY!,
       process.env.LIVEKIT_API_SECRET!,
@@ -33,9 +33,6 @@ export class MeetingsService {
   ) {
     await this.assertIsMember(userId, classroomId);
 
-    // Reuse an active meeting for this classroom if one already exists,
-    // otherwise create a new one — this is what makes "one active session
-    // per classroom" work without a teacher needing to coordinate timing.
     let meeting = await this.prisma.meeting.findFirst({
       where: { classroomId, endedAt: null },
     });
@@ -48,31 +45,9 @@ export class MeetingsService {
     }
 
     const token = await this.issueToken(userId, fullName, meeting.id);
-    return { meetingId: meeting.id, token, url: process.env.LIVEKIT_URL };
+    return { meetingId: meeting.id, token, url: process.env.LIVEKIT_PUBLIC_URL };
   }
 
-  // async endMeeting(userId: string, meetingId: string) {
-  //   const meeting = await this.prisma.meeting.findUnique({
-  //     where: { id: meetingId },
-  //     include: { classroom: true },
-  //   });
-  //   if (!meeting) {
-  //     throw new NotFoundException('Meeting not found');
-  //   }
-  //   if (meeting.classroom?.createdBy !== userId) {
-  //     throw new ForbiddenException('Only the teacher can end the meeting');
-  //   }
-
-  //   await this.roomService.deleteRoom(meetingId);
-  //   await this.prisma.meeting.update({
-  //     where: { id: meetingId },
-  //     data: { endedAt: new Date() },
-  //   });
-
-  //   return { ended: true };
-  // }
-
-  //chatgpt
   async endMeeting(userId: string, meetingId: string) {
     const meeting = await this.prisma.meeting.findUnique({
       where: { id: meetingId },
@@ -87,16 +62,11 @@ export class MeetingsService {
       throw new ForbiddenException("Only the teacher can end the meeting");
     }
 
-    // If the meeting is already ended, nothing more needs to be done.
     if (meeting.endedAt) {
       console.log("meeting.endedAt");
-
       return { ended: true };
     }
 
-    // The LiveKit room may already have disappeared if nobody joined
-    // or if it was already closed. That should not prevent us from
-    // marking the meeting as ended in our database.
     try {
       await this.roomService.deleteRoom(meetingId);
     } catch (error: any) {
@@ -105,7 +75,6 @@ export class MeetingsService {
       }
     }
 
-    // Always mark the meeting as ended in PostgreSQL.
     await this.prisma.meeting.update({
       where: { id: meetingId },
       data: { endedAt: new Date() },
