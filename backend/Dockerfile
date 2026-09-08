@@ -28,4 +28,4 @@ COPY --from=builder /app/prisma ./prisma
 COPY package.json ./
 
 EXPOSE 8000
-CMD ["node", "dist/main"]
+CMD ["node", "dist/src/main"]
