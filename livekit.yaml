@@ -1,13 +1,11 @@
-# port: 7880
-# rtc:
-#   tcp_port: 7881
-#   port_range_start: 51000
-#   port_range_end: 51100
-#   use_external_ip: true
-# keys:
-#   eclassroom-key: 8dhCFATzqF3NwghA+WVoTXXu6PA0yNDTmzlR5gj2aEY=
-# turn_servers:
-#   - host: localhost
-#     port: 3478
-#     protocol: udp
-#     secret: "4288402039b1a4a93b2121f1cbe36b0c66a202b189974d351a3d3cb93b85b24c"
+port: 7880
+rtc:
+  tcp_port: 7881
+  port_range_start: 51000
+  port_range_end: 51100
+  use_external_ip: true
+keys:
+  eclassroom-key: 8dhCFATzqF3NwghA+WVoTXXu6PA0yNDTmzlR5gj2aEY=
+turn:
+  enabled: true
+  udp_port: 3478
