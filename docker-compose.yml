@@ -1,69 +1,21 @@
 services:
-
-  # ============================================================
-  # PostgreSQL
-  # ============================================================
   postgres:
     image: postgres:16 # Docker downloads the official PostgreSQL 16 image and uses it to create the containex`x`r So you don't need to manually install PostgreSQL 16.
     container_name: eclassroom-postgres
     restart: unless-stopped
-
-    env_file:
-      - .env
-
     environment:
       POSTGRES_USER: eclassroom
       POSTGRES_PASSWORD: eclassroom_dev_password
       POSTGRES_DB: eclassroom
       # data persist so stopping/restarting the container doesn't wipe your database
     volumes:
-      - ./@Vol/postgres_data:/var/lib/postgresql/data
-
-    healthcheck:
-      test:
-        [
-          "CMD-SHELL",
-          "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"
-        ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
-
-  # ============================================================
-  # Redis
-  # ============================================================
+      - postgres_data:/var/lib/postgresql/data
   redis:
     image: redis:7
     container_name: eclassroom-redis
     restart: unless-stopped
     volumes:
-      - ./@Vol/redis_data:/data
-
-    command:
-      - redis-server
-      - --appendonly
-      - "yes"
-      - --requirepass
-      - ${REDIS_PASSWORD}
-
-    healthcheck:
-      test:
-        [
-          "CMD",
-          "redis-cli",
-          "-a",
-          "${REDIS_PASSWORD}",
-          "ping"
-        ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
-
-  # ============================================================
-  # MinIO
-  # ============================================================
+      - redis_data:/data
   minio:
     image: minio/minio:latest
     container_name: eclassroom-minio
@@ -72,9 +24,8 @@ services:
       - "9002:9000"
       - "9001:9001" # Web console — you'll browse files here in a browser
     environment:
-      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
-      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
-
+      MINIO_ROOT_USER: eclassroom
+      MINIO_ROOT_PASSWORD: eclassroom_dev_password
     volumes:
       - minio_data:/data
     command: server /data --console-address ":9001"
