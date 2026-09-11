@@ -10,12 +10,22 @@ services:
       # data persist so stopping/restarting the container doesn't wipe your database
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5434:5432" # Expose PostgreSQL on port 5434 of the host machine
   redis:
     image: redis:7
     container_name: eclassroom-redis
     restart: unless-stopped
     volumes:
       - redis_data:/data
+    ports:
+      - "6399:6379"
+    command:
+      - redis-server
+      - --appendonly
+      - "yes"
+      - --requirepass
+      - 6c0a6c1db3450900081ca26c24080825a51cc59ce3fdfb35  
   minio:
     image: minio/minio:latest
     container_name: eclassroom-minio
@@ -34,42 +44,45 @@ services:
     image: livekit/livekit-server:latest
     container_name: eclassroom-livekit
     restart: unless-stopped
-    volumes:
-      - ./livekit.yaml:/etc/livekit.yaml
-    command: --config /etc/livekit.yaml
+    environment:
+      LIVEKIT_KEYS: "eclassroom-key: 8dhCFATzqF3NwghA+WVoTXXu6PA0yNDTmzlR5gj2aEY="
+      LIVEKIT_RTC_PORT_RANGE_START: "51000"
+      LIVEKIT_RTC_PORT_RANGE_END: "51100"
+    command: --dev
+    # command: --config /etc/livekit.yaml
     network_mode: "host"
     # volumes:
     #   - ./livekit.yaml:/etc/livekit.yaml
     # command: --config /etc/livekit.yaml
 
-  backend:
-    build:
-      context: ./backend
-    container_name: eclassroom-backend
-    restart: unless-stopped
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
-    env_file:
-      - .env
-    ports:
-      - "8000:8000"
-    depends_on:
-      - postgres
-      - redis
-      - minio
+  # backend:
+  #   build:
+  #     context: ./backend
+  #   container_name: eclassroom-backend
+  #   restart: unless-stopped
+  #   extra_hosts:
+  #     - "host.docker.internal:host-gateway"
+  #   env_file:
+  #     - .env
+  #   ports:
+  #     - "8000:8000"
+  #   depends_on:
+  #     - postgres
+  #     - redis
+  #     - minio
 
-  frontend:
-    build:
-      context: ./frontend
-      args:
-        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
-        NEXT_PUBLIC_LIVEKIT_URL: ${NEXT_PUBLIC_LIVEKIT_URL}
-    container_name: eclassroom-frontend
-    restart: unless-stopped
-    ports:
-      - "3000:3000"
-    depends_on:
-      - backend
+  # frontend:
+  #   build:
+  #     context: ./frontend
+  #     args:
+  #       NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
+  #       NEXT_PUBLIC_LIVEKIT_URL: ${NEXT_PUBLIC_LIVEKIT_URL}
+  #   container_name: eclassroom-frontend
+  #   restart: unless-stopped
+  #   ports:
+  #     - "3000:3000"
+  #   depends_on:
+  #     - backend
   
   
 

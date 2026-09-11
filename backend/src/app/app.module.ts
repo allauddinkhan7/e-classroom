@@ -10,9 +10,10 @@ import { FilesModule } from "../files/files.module";
 import { MaterialsModule } from "../materials/materials.module";
 import { NotesModule } from "../notes/notes.module";
 import { MeetingsModule } from "../meetings/meetings.module";
+import { ChatModule } from "../chat/chat.module";
 
 @Module({
-  imports: [PrismaModule, RedisModule, UsersModule, AuthModule, ClassroomModule, AssignmentsModule, FilesModule, MaterialsModule, NotesModule, MeetingsModule],
+  imports: [PrismaModule, RedisModule, UsersModule, AuthModule, ClassroomModule, AssignmentsModule, FilesModule, MaterialsModule, NotesModule, MeetingsModule, ChatModule],
   controllers: [AppController],
 })
 export class AppModule {}
