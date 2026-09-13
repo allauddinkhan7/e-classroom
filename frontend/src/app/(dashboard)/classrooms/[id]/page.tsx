@@ -10,6 +10,7 @@ import {
   FileText,
   NotebookPen,
   Users2,
+  MessageSquare,
 } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
@@ -100,6 +101,13 @@ export default function ClassroomDetailPage() {
       description: "View and manage notes for this classroom.",
       icon: NotebookPen,
       gradient: "from-teal-600 to-emerald-900",
+    },
+    {
+      slug: "chat",
+      title: "Chat",
+      description: "Message everyone in this classroom.",
+      icon: MessageSquare, // import from lucide-react
+      gradient: "from-violet-600 to-purple-900",
     },
   ];
 
