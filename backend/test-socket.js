@@ -13,4 +13,5 @@ socket.on('connect', () => {
   }, 1000);
 });
 
-socket.on('newMessage', (msg) => console.log('Received:', msg));
+socket.on('newMessage', (msg) => console.log('Received:', msg));    
+// to run this : e-classroom/backend$ node test-socket.js
