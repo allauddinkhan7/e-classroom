@@ -1,4 +1,4 @@
-import { Module } from "@nestjs/common";
+import { forwardRef, Module } from "@nestjs/common";
 import { AuthService } from "./auth.service";
 import { AuthController } from "./auth.controller";
 import { UsersModule } from "../users/users.module";
@@ -9,7 +9,9 @@ import { JwtStrategy } from "./jwt.strategy";
 
 @Module({
   imports: [
-    UsersModule,
+    // UsersModule,  // Circular dependency =>  AuthMoule already imports UserModule Two modules importing each other directly.
+    // The standard fix is forwardRef(),tells Nest "these two depend on each other, resolve them lazily instead of trying to fully build one before the other.
+    forwardRef(() => UsersModule),
     RedisModule,
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.register({

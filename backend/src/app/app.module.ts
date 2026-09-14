@@ -11,9 +11,10 @@ import { MaterialsModule } from "../materials/materials.module";
 import { NotesModule } from "../notes/notes.module";
 import { MeetingsModule } from "../meetings/meetings.module";
 import { ChatModule } from "../chat/chat.module";
+import { ConversationsModule } from "../conversations/conversations.module";
 
 @Module({
-  imports: [PrismaModule, RedisModule, UsersModule, AuthModule, ClassroomModule, AssignmentsModule, FilesModule, MaterialsModule, NotesModule, MeetingsModule, ChatModule],
+  imports: [PrismaModule, RedisModule, UsersModule, AuthModule, ClassroomModule, AssignmentsModule, FilesModule, MaterialsModule, NotesModule, MeetingsModule, ChatModule, ConversationsModule],
   controllers: [AppController],
 })
 export class AppModule {}

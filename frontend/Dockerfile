@@ -13,9 +13,7 @@ COPY . .
 # NEXT_PUBLIC_* vars are baked in at build time, so they must be
 # passed as build args, not just runtime env vars
 ARG NEXT_PUBLIC_API_URL
-ARG NEXT_PUBLIC_LIVEKIT_URL
 ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
-ENV NEXT_PUBLIC_LIVEKIT_URL=$NEXT_PUBLIC_LIVEKIT_URL
 
 RUN npm run build
 
