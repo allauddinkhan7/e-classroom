@@ -6,14 +6,17 @@ import { Loader2, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useCurrentUser } from "@/lib/auth/use-current-user";
-import { useMessageHistory } from "@/lib/chat/use-message-history";
+import { useConversationMessages } from "@/lib/conversations/use-conversations";
 import { useChatSocket } from "@/lib/chat/use-chat-socket";
 
-export default function ClassroomChatPage() {
+export default function ConversationPage() {
   const params = useParams<{ id: string }>();
   const { user } = useCurrentUser();
-  const { data: history, isLoading } = useMessageHistory(params.id);
-  const { isConnected, liveMessages, sendMessage } = useChatSocket({ type: "classroom", id: params.id });
+  const { data: history, isLoading } = useConversationMessages(params.id);
+  const { isConnected, liveMessages, sendMessage } = useChatSocket({
+    type: "conversation",
+    id: params.id,
+  });
   const [draft, setDraft] = useState("");
   const bottomRef = useRef<HTMLDivElement>(null);
 
@@ -33,7 +36,7 @@ export default function ClassroomChatPage() {
   return (
     <div className="flex h-[calc(100vh-8rem)] flex-col rounded-lg border">
       <div className="flex items-center justify-between border-b p-3">
-        <h2 className="text-sm font-medium">Classroom Chat</h2>
+        <h2 className="text-sm font-medium">Conversation</h2>
         <span className={`text-xs ${isConnected ? "text-emerald-600" : "text-muted-foreground"}`}>
           {isConnected ? "Connected" : "Connecting..."}
         </span>

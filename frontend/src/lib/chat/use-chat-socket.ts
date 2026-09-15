@@ -10,36 +10,43 @@ type ChatMessage = {
   sender: { id: string; fullName: string };
 };
 
-export function useChatSocket(classroomId: string) {
-  const socketRef = useRef<Socket | null>(null); // used useRef for 
+type ChatTarget = { type: "classroom" | "conversation"; id: string };
+
+let target:any;
+export function useChatSocket(target: ChatTarget) {
+  const socketRef = useRef<Socket | null>(null); 
   const [isConnected, setIsConnected] = useState(false);
   const [liveMessages, setLiveMessages] = useState<ChatMessage[]>([]);
 
   useEffect(() => {
     const token = localStorage.getItem("accessToken");
-    const socket = io(process.env.NEXT_PUBLIC_API_URL, {
-      auth: { token },
-    });
+    const socket = io(process.env.NEXT_PUBLIC_API_URL, { auth: { token } });
     socketRef.current = socket;
+    const joinEvent = target.type === "classroom" ? "joinClassroom" : "joinConversation";
+    const idKey = target.type === "classroom" ? "classroomId" : "conversationId";
+    const messageEvent = target.type === "classroom" ? "newMessage" : "newDirectMessage";
+
 
     socket.on("connect", () => {
       setIsConnected(true);
-      socket.emit("joinClassroom", { classroomId });
+      socket.emit(joinEvent, { [idKey]: target.id });
     });
 
     socket.on("disconnect", () => setIsConnected(false));
 
-    socket.on("newMessage", (message: ChatMessage) => {
+    socket.on(messageEvent, (message: ChatMessage) => {
       setLiveMessages((prev) => [...prev, message]);
     });
 
     return () => {
       socket.disconnect();
     };
-  }, [classroomId]);
+  }, [target.type, target.id]);
 
   function sendMessage(content: string) {
-    socketRef.current?.emit("sendMessage", { classroomId, content });
+    const event = target.type === "classroom" ? "sendMessage" : "sendDirectMessage";
+    const idKey = target.type === "classroom" ? "classroomId" : "conversationId";
+    socketRef.current?.emit(event, { [idKey]: target.id, content });
   }
 
   return { isConnected, liveMessages, sendMessage };

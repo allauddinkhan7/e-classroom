@@ -1,15 +1,15 @@
 const { io } = require('socket.io-client');
 
 const socket = io('http://localhost:8000', {
-  auth: { token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmdWxsTmFtZSI6InNzcyIsInN1YiI6ImVlNmI4ZTBiLTk0ZTItNDMyMC1iOTQ1LWJlZWU3NzUwMjhlZiIsImVtYWlsIjoiYUBnbWFpbC5jb20iLCJyb2xlIjoiVEVBQ0hFUiIsImlhdCI6MTc4OTEzMTE1MiwiZXhwIjoxNzg5MTMyMDUyfQ.EVY-Qy-WoHXQIcOkNjbfGBgIZQdfdhc6EEFTVI6ZhII' },
+  auth: { token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmdWxsTmFtZSI6ImFsaSIsInN1YiI6Ijg4NWEwZTJlLWFlMjctNDk4Zi05NmVlLWUyMGUxMmE1ZmY3MiIsImVtYWlsIjoiYUBnbWFpbC5jb20iLCJyb2xlIjoiVEVBQ0hFUiIsImlhdCI6MTc4OTQ1Mzg3OSwiZXhwIjoxNzg5NDU0Nzc5fQ.ypYDUolhZ0n9PfbLmpRVQZHyXqSGLezyU7Lif2XkY8s' },
 });
 
 socket.on('connect', () => {
   console.log('connected');
-  socket.emit('joinClassroom', { classroomId: 'adefca31-e33a-42a0-aa21-c511fd302b3e' });
+  socket.emit('joinClassroom', { classroomId: 'de35060c-78e2-44ad-bc0c-9a6f33610a85' });
 
   setTimeout(() => {
-    socket.emit('sendMessage', { classroomId: 'adefca31-e33a-42a0-aa21-c511fd302b3e', content: 'Hello from test script' });
+    socket.emit('sendMessage', { classroomId: 'de35060c-78e2-44ad-bc0c-9a6f33610a85', content: 'Hello from test script' });
   }, 1000);
 });
 
