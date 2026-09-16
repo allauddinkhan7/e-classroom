@@ -16,14 +16,19 @@ import {
 } from "@/components/ui/dialog";
 import { useSearchUsers, useStartConversation } from "@/lib/conversations/use-conversations";
 
-export function NewMessageDialog() {
+export function NewMessageDialog({ onCreated }: { onCreated?: (conversationId: string) => void }) {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
   const { data: users, isLoading } = useSearchUsers(search);
   const startConversation = useStartConversation();
 
   function handleSelect(userId: string) {
-    startConversation.mutate([userId], { onSuccess: () => setOpen(false) });
+    startConversation.mutate([userId], {
+      onSuccess: (conversation) => {
+        setOpen(false);
+        onCreated?.(conversation.id);
+      },
+    });
   }
 
   return (

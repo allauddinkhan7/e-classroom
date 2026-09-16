@@ -1,72 +1,49 @@
 "use client";
 
-import Link from "next/link";
-import { AlertCircle, Loader2, MessageSquare } from "lucide-react";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { useConversations } from "@/lib/conversations/use-conversations";
-import { useCurrentUser } from "@/lib/auth/use-current-user";
+import { useState } from "react";
+import { MessageSquare } from "lucide-react";
 import { NewMessageDialog } from "@/components/messages/new-message-dialog";
+import { ConversationList } from "@/components/messages/conversation-list";
+import { ConversationThread } from "@/components/messages/conversation-thread";
+import { cn } from "@/lib/utils";
 
 export default function MessagesPage() {
-  const { user } = useCurrentUser();
-  const { data: conversations, isLoading, isError } = useConversations();
-
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  console.log("MessagesPage........................",selectedId)
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Messages</h1>
-          <p className="text-sm text-muted-foreground">Your direct conversations</p>
+    <div className="flex h-[calc(100vh-8rem)]">
+      {/* List pane — full width on mobile when nothing's selected, fixed width alongside the thread on desktop */}
+      <div
+        className={cn(
+          "flex w-full flex-col rounded-l-lg border-t border-l border-b bg-background lg:w-80 lg:shrink-0",
+          selectedId && "hidden lg:flex", // hide list on mobile once a thread is open
+        )}
+      >
+        <div className="flex items-center justify-between border-b p-3">
+          <h1 className="text-sm font-semibold">Messages</h1>
+            <NewMessageDialog onCreated={setSelectedId} />
         </div>
-        <NewMessageDialog />
+        <div className="flex-1 overflow-y-auto">
+          <ConversationList activeId={selectedId ?? undefined} onSelect={setSelectedId} />
+        </div>
       </div>
 
-      {isLoading && (
-        <div className="flex min-h-[200px] items-center justify-center">
-          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-        </div>
-      )}
-
-      {isError && (
-        <div className="flex min-h-[200px] flex-col items-center justify-center gap-2 text-center">
-          <AlertCircle className="h-8 w-8 text-destructive" />
-          <p className="text-sm text-muted-foreground">Couldn&apos;t load your messages.</p>
-        </div>
-      )}
-
-      {!isLoading && !isError && conversations?.length === 0 && (
-        <div className="flex min-h-[200px] flex-col items-center justify-center gap-2 rounded-lg border border-dashed text-center">
-          <MessageSquare className="h-8 w-8 text-muted-foreground" />
-          <p className="text-sm font-medium">No conversations yet</p>
-          <p className="text-sm text-muted-foreground">Start one with the button above.</p>
-        </div>
-      )}
-
-      {!isLoading && !isError && conversations && conversations.length > 0 && (
-        <div className="divide-y rounded-lg border bg-background">
-          {conversations.map((conv) => {
-            const other = conv.participants.find((p) => p.user.id !== user?.userId)?.user;
-            const lastMessage = conv.messages[0];
-            return (
-              <Link
-                key={conv.id}
-                href={`/messages/${conv.id}`}
-                className="flex items-center gap-3 p-3 hover:bg-secondary/30"
-              >
-                <Avatar className="h-10 w-10">
-                  <AvatarFallback>{other?.fullName.slice(0, 2).toUpperCase() ?? "??"}</AvatarFallback>
-                </Avatar>
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-medium">{other?.fullName ?? "Unknown"}</p>
-                  <p className="truncate text-xs text-muted-foreground">
-                    {lastMessage ? lastMessage.content : "No messages yet"}
-                  </p>
-                </div>
-              </Link>
-            );
-          })}
-        </div>
-      )}
+      {/* Thread pane — hidden on mobile until a conversation is selected; always visible on desktop */}
+      <div
+        className={cn(
+          "w-full flex-1 rounded-r-lg bg-background border",
+          !selectedId && "hidden lg:flex lg:items-center lg:justify-center",
+        )}
+      >
+        {selectedId ? (
+          <ConversationThread conversationId={selectedId} onBack={() => setSelectedId(null)} />
+        ) : (
+          <div className="hidden flex-col items-center gap-2 text-center text-muted-foreground lg:flex">
+            <MessageSquare className="h-10 w-10" />
+            <p className="text-sm">Select a conversation to start messaging</p>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

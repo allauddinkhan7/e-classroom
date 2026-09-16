@@ -1,16 +1,13 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useRouter } from "next/navigation";
-import {
-  fetchConversations,
-  createConversation,
-  fetchConversationMessages,
-  searchUsers,
-} from "./conversations-api";
+import { fetchConversations, createConversation, fetchConversationMessages, searchUsers } from "./conversations-api";
 
 export function useConversations() {
-  return useQuery({ queryKey: ["conversations"], queryFn: fetchConversations });
+  return useQuery({ 
+    queryKey: ["conversations"],
+    queryFn: fetchConversations
+  });
 }
 
 export function useConversationMessages(id: string) {
@@ -23,13 +20,10 @@ export function useConversationMessages(id: string) {
 
 export function useStartConversation() {
   const queryClient = useQueryClient();
-  const router = useRouter();
-
   return useMutation({
     mutationFn: (participantIds: string[]) => createConversation(participantIds),
-    onSuccess: (conversation) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["conversations"] });
-      router.push(`/messages/${conversation.id}`);
     },
   });
 }

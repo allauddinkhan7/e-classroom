@@ -36,9 +36,9 @@ export class ConversationsService {
 
   async findAllForUser(userId: string) {
     return this.prisma.conversation.findMany({
-      where: { participants: { some: { userId } } },
-      include: {
-        participants: { include: { user: { select: { id: true, fullName: true } } } },
+      where: { participants: { some: { userId } } }, // at least one participant has this userId
+      include: {    
+        participants: { include: { user: { select: { id: true, fullName: true } } } }, // fetch its participants, and for each participant fetch their user information.
         messages: { orderBy: { sentAt: 'desc' }, take: 1 }, // preview: last message only
       },
       orderBy: { createdAt: 'desc' },

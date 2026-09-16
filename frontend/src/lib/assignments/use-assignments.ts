@@ -34,9 +34,9 @@ export function useUpdateAssignment(classroomId: string, assignmentId: string) {
       totalMarks?: number;
       dueAt?: string;
       fileId?: string;
-    }) => updateAssignment(assignmentId, data),
+    }) => updateAssignment(assignmentId, data), // assignments/${assignmentId}
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["classrooms", classroomId, "assignments"] });
+      queryClient.invalidateQueries({ queryKey: ["classrooms", classroomId, "assignments"] }); // This cached data is now outdated. Fetch it again.
       toast.success("Assignment updated");
     },
     onError: () => toast.error("Couldn't update the assignment — please try again"),

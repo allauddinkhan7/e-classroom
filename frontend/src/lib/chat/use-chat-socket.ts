@@ -12,7 +12,6 @@ type ChatMessage = {
 
 type ChatTarget = { type: "classroom" | "conversation"; id: string };
 
-let target:any;
 export function useChatSocket(target: ChatTarget) {
   const socketRef = useRef<Socket | null>(null); 
   const [isConnected, setIsConnected] = useState(false);
@@ -26,10 +25,15 @@ export function useChatSocket(target: ChatTarget) {
     const idKey = target.type === "classroom" ? "classroomId" : "conversationId";
     const messageEvent = target.type === "classroom" ? "newMessage" : "newDirectMessage";
 
+    console.log("socket ........................", socket);
 
+    console.log("idKey ........................", idKey);
+    console.log("joinEvent ........................", joinEvent);
+
+    console.log("messageEvent ........................", messageEvent);
     socket.on("connect", () => {
       setIsConnected(true);
-      socket.emit(joinEvent, { [idKey]: target.id });
+      socket.emit(joinEvent, { [idKey]: target.id }); //target.id -> classroomId or conversationId
     });
 
     socket.on("disconnect", () => setIsConnected(false));
@@ -48,6 +52,8 @@ export function useChatSocket(target: ChatTarget) {
     const idKey = target.type === "classroom" ? "classroomId" : "conversationId";
     socketRef.current?.emit(event, { [idKey]: target.id, content });
   }
+  console.log("socketRef ........................", socketRef);
+
 
   return { isConnected, liveMessages, sendMessage };
 }
