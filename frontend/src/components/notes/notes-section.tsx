@@ -1,11 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { AlertCircle, Loader2, NotebookPen, Trash2, X } from "lucide-react";
+import { AlertCircle, ArrowLeft, Loader2, NotebookPen, Trash2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
 import { useNotes, useCreateNote, useUpdateNote, useDeleteNote } from "@/lib/notes/use-notes";
+import Link from "next/link";
 
 export function NotesSection({ classroomId }: { classroomId: string }) {
   const [content, setContent] = useState("");
@@ -44,7 +45,12 @@ export function NotesSection({ classroomId }: { classroomId: string }) {
 
   return (
     <div className="space-y-3">
-      <h2 className="text-sm font-medium text-muted-foreground">My Notes</h2>
+       <div className="flex items-center gap-2">
+          <Link href={`/classrooms/${classroomId}/`} className="group block">
+            <ArrowLeft className="h-4 w-4" />
+          </Link>
+          <h2 className="text-xl font-semibold">My Notes</h2>
+        </div>
 
       <div className="space-y-2">
         <Textarea

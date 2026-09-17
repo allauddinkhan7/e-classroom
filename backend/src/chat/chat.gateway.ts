@@ -11,6 +11,7 @@ import { Server, Socket } from 'socket.io';
 import { WsJwtGuard } from './ws-jwt.guard';
 import { PrismaService } from '../prisma/prisma.service';
 import { ConversationsService } from '../conversations/conversations.service';
+import { RedisService } from '../redis/redis.service';
 
 @WebSocketGateway({ cors: { origin: "*" } })
 export class ChatGateway implements OnGatewayConnection {
@@ -20,11 +21,35 @@ export class ChatGateway implements OnGatewayConnection {
   constructor(
     private readonly prisma: PrismaService,
     private readonly conversationsService: ConversationsService,
+    private readonly redis: RedisService,
   ) {}
 
   async handleConnection(client: Socket) {
     // Connection-level auth happens per-event via WsJwtGuard below;
     // this hook is just here in case we need connection logging later.
+  }
+
+  async handleDisconnect(client: Socket) {
+    const userId = client.data.user?.userId;
+    if (!userId) return;
+
+    // A user might have multiple tabs/devices connected — only mark them
+    // fully offline once their LAST connection closes, not the first.
+    const remaining = await this.redis.decr(`presence:${userId}`);
+    if (remaining <= 0) {
+      await this.redis.del(`presence:${userId}`);
+      this.server.emit("presenceChanged", { userId, online: false });
+    }
+  }
+
+  @UseGuards(WsJwtGuard)
+  @SubscribeMessage("markOnline")
+  async markOnline(@ConnectedSocket() client: Socket) {
+    const userId = client.data.user.userId;
+    const count = await this.redis.incr(`presence:${userId}`);
+    if (count === 1) {
+      this.server.emit("presenceChanged", { userId, online: true });
+    }
   }
 
   @UseGuards(WsJwtGuard)
@@ -72,7 +97,10 @@ export class ChatGateway implements OnGatewayConnection {
 
   @UseGuards(WsJwtGuard)
   @SubscribeMessage("joinConversation")
-  async joinConversation(@ConnectedSocket() client: Socket, @MessageBody() data: { conversationId: string }) {
+  async joinConversation(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() data: { conversationId: string },
+  ) {
     const userId = client.data.user.userId;
     try {
       await this.conversationsService.assertIsParticipant(
@@ -87,7 +115,10 @@ export class ChatGateway implements OnGatewayConnection {
 
   @UseGuards(WsJwtGuard)
   @SubscribeMessage("sendDirectMessage")
-  async sendDirectMessage(@ConnectedSocket() client: Socket, @MessageBody() data: { conversationId: string; content: string }) {
+  async sendDirectMessage(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() data: { conversationId: string; content: string },
+  ) {
     const userId = client.data.user.userId;
     try {
       await this.conversationsService.assertIsParticipant(

@@ -68,7 +68,7 @@ export function ConversationThread({ conversationId, onBack }: { conversationId:
             const isOwn = msg.sender.id === user?.userId;
             return (
               <div key={msg.id} className={`flex flex-col ${isOwn ? "items-end" : "items-start"}`}>
-                <span className="text-xs text-muted-foreground">{msg.sender.fullName}</span>
+                {/* <span className="text-xs text-muted-foreground">{msg.sender.fullName}</span> */}
                 <div
                   className={`max-w-[75%] px-3 py-2 text-sm ${
                     isOwn ? "bg-gray-800 text-primary-foreground border rounded-tl-xl rounded-br-xl rounded-bl-xl" : "bg-secondary border rounded-tr-xl rounded-br-xl rounded-bl-xl"

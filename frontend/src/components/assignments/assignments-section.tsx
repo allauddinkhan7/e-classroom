@@ -2,6 +2,7 @@
 
 import {
   AlertCircle,
+  ArrowLeft,
   CalendarClock,
   ClipboardList,
   Loader2,
@@ -17,6 +18,7 @@ import { FileDownloadLink } from "@/lib/files/file-download-link";
 import { SubmitAssignmentDialog } from "./submit-assignment-dialog";
 import { EditAssignment } from "./edit-assignment";
 import { CreateAssignmentDialog } from "./create-assignment-dialog";
+import Link from "next/link";
 export function AssignmentsSection({
   classroomId,
   isTeacher,
@@ -28,9 +30,14 @@ export function AssignmentsSection({
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <h2 className="text-sm font-medium text-muted-foreground">
+        <div className="flex items-center gap-2">
+          <Link href={`/classrooms/${classroomId}/`} className="group block">
+            <ArrowLeft className="h-4 w-4" />
+          </Link>
+        <h2 className="text-xl font-semibold">
           Assignments
         </h2>
+        </div>
         {isTeacher && <CreateAssignmentDialog classroomId={classroomId} />}
       </div>
 
@@ -76,23 +83,21 @@ export function AssignmentsSection({
                       Due {new Date(a.dueAt).toLocaleString()} · {a.totalMarks}{" "}
                       marks
                     </p>
-                   
                   </div>
 
                   <div className="flex shrink-0 items-center gap-2">
                     {isTeacher ? (
-                     <>
-                      <SubmissionsDialog
-                        assignmentId={a.id}
-                        assignmentTitle={a.title}
-                        totalMarks={a.totalMarks}
-                      />
-                       <EditAssignment 
-                        assignmentId={a.id}
-                        classroomId={classroomId}
+                      <>
+                        <SubmissionsDialog
+                          assignmentId={a.id}
+                          assignmentTitle={a.title}
+                          totalMarks={a.totalMarks}
                         />
-                     </>
-                      
+                        <EditAssignment
+                          assignmentId={a.id}
+                          classroomId={classroomId}
+                        />
+                      </>
                     ) : mySubmission ? (
                       <Badge
                         variant={
@@ -108,18 +113,18 @@ export function AssignmentsSection({
                     ) : isPastDue ? (
                       <Badge variant="outline">Past due</Badge>
                     ) : (
-                    <div className="flex flex-col gap-5 items-center gap-2">
+                      <div className="flex flex-col gap-5 items-center gap-2">
                         {a.file && (
-                        <FileDownloadLink
-                          fileId={a.file.id}
-                          label={a.file.originalName}
+                          <FileDownloadLink
+                            fileId={a.file.id}
+                            label={a.file.originalName}
+                          />
+                        )}
+                        <SubmitAssignmentDialog
+                          assignmentId={a.id}
+                          classroomId={classroomId}
                         />
-                      )}
-                      <SubmitAssignmentDialog
-                        assignmentId={a.id}
-                        classroomId={classroomId}
-                        />
-                        </div>
+                      </div>
                     )}
                   </div>
                 </CardContent>

@@ -3,6 +3,7 @@
 import { useParams } from "next/navigation";
 import {
   AlertCircle,
+  ArrowLeft,
   Loader2,
   Users,
 } from "lucide-react";
@@ -13,6 +14,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useClassroom } from "@/lib/classrooms/use-classrooms";
 import { useCurrentUser } from "@/lib/auth/use-current-user";
 import { AddStudentsDialog } from "@/components/classrooms/add-students-dialog";
+import Link from "next/link";
 
 export default function MembersPage() {
   const params = useParams<{ id: string }>();
@@ -61,15 +63,14 @@ export default function MembersPage() {
       <div className="flex items-start justify-between">
         <div>
           <div className="flex items-center gap-2">
-            <Users className="h-5 w-5" />
+            <div className="flex items-center gap-2">
+              <Link href={`/classrooms/${params.id}/`} className="group block">
+                <ArrowLeft className="h-4 w-4" />
+              </Link>
+              <h1 className="text-xl font-semibold">Members</h1>
+            </div>
 
-            <h1 className="text-xl font-semibold">
-              Members
-            </h1>
-
-            <Badge variant="secondary">
-              {classroom.enrollments.length}
-            </Badge>
+            <Badge variant="secondary">{classroom.enrollments.length}</Badge>
           </div>
 
           <p className="mt-1 text-sm text-muted-foreground">
@@ -88,15 +89,10 @@ export default function MembersPage() {
       {/* Members */}
       <div className="divide-y rounded-xl border bg-white">
         {classroom.enrollments.map((enrollment) => (
-          <div
-            key={enrollment.id}
-            className="flex items-center gap-3 p-4"
-          >
+          <div key={enrollment.id} className="flex items-center gap-3 p-4">
             <Avatar className="h-10 w-10">
               <AvatarFallback className="text-xs">
-                {enrollment.user.fullName
-                  .slice(0, 2)
-                  .toUpperCase()}
+                {enrollment.user.fullName.slice(0, 2).toUpperCase()}
               </AvatarFallback>
             </Avatar>
 
@@ -111,9 +107,7 @@ export default function MembersPage() {
             </div>
 
             {enrollment.roleInClass === "HOST" && (
-              <Badge variant="outline">
-                {isCourse ? "Teacher" : "Host"}
-              </Badge>
+              <Badge variant="outline">{isCourse ? "Teacher" : "Host"}</Badge>
             )}
           </div>
         ))}

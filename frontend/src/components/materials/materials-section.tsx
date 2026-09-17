@@ -1,11 +1,12 @@
 "use client";
 
-import { AlertCircle, FileText, Loader2, Trash2 } from "lucide-react";
+import { AlertCircle, ArrowLeft, FileText, Loader2, Trash2 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useMaterials, useDeleteMaterial } from "@/lib/materials/use-materials";
 import { CreateMaterialDialog } from "./create-material-dialog";
 import { FileDownloadLink } from "@/lib/files/file-download-link";
+import Link from "next/link";
 
 export function MaterialsSection({
   classroomId,
@@ -20,7 +21,15 @@ export function MaterialsSection({
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <h2 className="text-sm font-medium text-muted-foreground">Materials</h2>
+        <div className="flex items-center gap-2">
+          <Link href={`/classrooms/${classroomId}/`} className="group block">
+            <ArrowLeft className="h-4 w-4" />
+          </Link>
+          <h2 className="text-xl font-semibold">
+            Materials
+          </h2>
+        </div>
+
         {isTeacher && <CreateMaterialDialog classroomId={classroomId} />}
       </div>
 
@@ -33,14 +42,18 @@ export function MaterialsSection({
       {isError && (
         <div className="flex min-h-[100px] flex-col items-center justify-center gap-1 rounded-lg border text-center">
           <AlertCircle className="h-6 w-6 text-destructive" />
-          <p className="text-sm text-muted-foreground">Couldn&apos;t load materials</p>
+          <p className="text-sm text-muted-foreground">
+            Couldn&apos;t load materials
+          </p>
         </div>
       )}
 
       {!isLoading && !isError && materials?.length === 0 && (
         <div className="flex min-h-[100px] flex-col items-center justify-center gap-1 rounded-lg border border-dashed text-center">
           <FileText className="h-6 w-6 text-muted-foreground" />
-          <p className="text-sm text-muted-foreground">No materials posted yet</p>
+          <p className="text-sm text-muted-foreground">
+            No materials posted yet
+          </p>
         </div>
       )}
 
@@ -51,7 +64,12 @@ export function MaterialsSection({
               <CardContent className="flex items-center justify-between gap-3 p-3">
                 <div className="min-w-0 space-y-0.5">
                   <p className="truncate text-sm font-medium">{m.title}</p>
-                  {m.file && <FileDownloadLink fileId={m.file.id} label={m.file.originalName} />}
+                  {m.file && (
+                    <FileDownloadLink
+                      fileId={m.file.id}
+                      label={m.file.originalName}
+                    />
+                  )}
                 </div>
                 {isTeacher && (
                   <Button

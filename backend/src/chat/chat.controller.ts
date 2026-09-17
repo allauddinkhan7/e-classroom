@@ -22,4 +22,6 @@ export class ChatController {
       take: take ? Number(take) : 50,
     });
   }
+
+  
 }

@@ -9,7 +9,6 @@ import { cn } from "@/lib/utils";
 
 export default function MessagesPage() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  console.log("MessagesPage........................",selectedId)
   return (
     <div className="flex h-[calc(100vh-8rem)]">
       {/* List pane — full width on mobile when nothing's selected, fixed width alongside the thread on desktop */}

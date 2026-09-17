@@ -25,15 +25,10 @@ export function useChatSocket(target: ChatTarget) {
     const idKey = target.type === "classroom" ? "classroomId" : "conversationId";
     const messageEvent = target.type === "classroom" ? "newMessage" : "newDirectMessage";
 
-    console.log("socket ........................", socket);
-
-    console.log("idKey ........................", idKey);
-    console.log("joinEvent ........................", joinEvent);
-
-    console.log("messageEvent ........................", messageEvent);
     socket.on("connect", () => {
       setIsConnected(true);
       socket.emit(joinEvent, { [idKey]: target.id }); //target.id -> classroomId or conversationId
+      socket.emit("markOnline");
     });
 
     socket.on("disconnect", () => setIsConnected(false));
