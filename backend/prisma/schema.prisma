@@ -42,6 +42,7 @@ model User {
   messagesSent          Message[]
   meetingParticipations MeetingParticipant[]
   notifications         Notification[]
+  attendanceResponses   AttendanceResponse[]
 }
 
 model Classroom {
@@ -75,15 +76,15 @@ model Enrollment {
 }
 
 model Assignment {
-  id          String   @id @default(uuid())
+  id          String       @id @default(uuid())
   classroomId String
   title       String
   description String?
   totalMarks  Int
   dueAt       DateTime
-  createdAt   DateTime @default(now())
+  createdAt   DateTime     @default(now())
   fileId      String?
-  file        File?    @relation(fields: [fileId], references: [id])
+  file        File?        @relation(fields: [fileId], references: [id])
   classroom   Classroom    @relation(fields: [classroomId], references: [id])
   submissions Submission[]
 }
@@ -219,6 +220,7 @@ model AttendanceResponse {
   respondedAt       DateTime @default(now())
 
   attendanceCheck AttendanceCheck @relation(fields: [attendanceCheckId], references: [id])
+  user            User            @relation(fields: [userId], references: [id])
 
   @@unique([attendanceCheckId, userId])
 }
@@ -273,5 +275,5 @@ model File {
   usedAsAvatarBy User[]       @relation("UserAvatar")
   submissions    Submission[]
   materials      Material[]
-  assignments Assignment[]
+  assignments    Assignment[]
 }

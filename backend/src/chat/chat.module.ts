@@ -6,9 +6,10 @@ import { AuthModule } from '../auth/auth.module';
 import { ConversationsModule } from '../conversations/conversations.module';
 import { RedisModule } from '../redis/redis.module';
 import { PresenceController } from './presence.controller';
+import { EngagementModule } from '../engagement/engagement.module';
 
 @Module({
-  imports: [AuthModule, ConversationsModule, RedisModule],
+  imports: [AuthModule, ConversationsModule, RedisModule, EngagementModule],
   controllers: [ChatController, PresenceController],
   providers: [ChatGateway, WsJwtGuard],
 })

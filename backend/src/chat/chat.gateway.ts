@@ -12,6 +12,7 @@ import { WsJwtGuard } from './ws-jwt.guard';
 import { PrismaService } from '../prisma/prisma.service';
 import { ConversationsService } from '../conversations/conversations.service';
 import { RedisService } from '../redis/redis.service';
+import { EngagementService } from '../engagement/engagement.service';
 
 @WebSocketGateway({ cors: { origin: "*" } })
 export class ChatGateway implements OnGatewayConnection {
@@ -22,6 +23,7 @@ export class ChatGateway implements OnGatewayConnection {
     private readonly prisma: PrismaService,
     private readonly conversationsService: ConversationsService,
     private readonly redis: RedisService,
+    private readonly engagementService: EngagementService,
   ) {}
 
   async handleConnection(client: Socket) {
@@ -141,5 +143,53 @@ export class ChatGateway implements OnGatewayConnection {
     this.server
       .to(`conversation:${data.conversationId}`)
       .emit("newDirectMessage", message);
+  }
+
+  @UseGuards(WsJwtGuard)
+  @SubscribeMessage("triggerAttendanceCheck")
+  async triggerAttendanceCheck(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() data: { classroomId: string },
+  ) {
+    const userId = client.data.user.userId;
+    try {
+      const check = await this.engagementService.triggerAttendanceCheck(
+        userId,
+        data.classroomId,
+      );
+      // Broadcast to everyone in the classroom room — this is the actual
+      // "surprise pop-up" moment students see live.
+      this.server
+        .to(`classroom:${data.classroomId}`)
+        .emit("attendanceCheckStarted", { id: check.id });
+    } catch (error: any) {
+      client.emit("actionError", {
+        message: error?.message ?? "Could not start attendance check",
+      });
+    }
+  }
+
+  @UseGuards(WsJwtGuard)
+  @SubscribeMessage("respondToAttendance")
+  async respondToAttendance(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() data: { attendanceCheckId: string; classroomId: string },
+  ) {
+    const userId = client.data.user.userId;
+    try {
+      await this.engagementService.respondToAttendance(
+        userId,
+        data.attendanceCheckId,
+      );
+      // Let the teacher's UI update live as responses come in, without polling.
+      this.server
+        .to(`classroom:${data.classroomId}`)
+        .emit("attendanceResponseReceived", {
+          attendanceCheckId: data.attendanceCheckId,
+          userId,
+        });
+    } catch {
+      // Already responded, or not a member — silently ignore, same pattern as elsewhere
+    }
   }
 }
