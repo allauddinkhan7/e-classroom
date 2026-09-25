@@ -43,6 +43,7 @@ model User {
   meetingParticipations MeetingParticipant[]
   notifications         Notification[]
   attendanceResponses   AttendanceResponse[]
+  questionResponses     QuestionResponse[]
 }
 
 model Classroom {
@@ -244,6 +245,7 @@ model QuestionResponse {
   respondedAt   DateTime @default(now())
 
   popQuestion PopQuestion @relation(fields: [popQuestionId], references: [id])
+  user        User        @relation(fields: [userId], references: [id])
 
   @@unique([popQuestionId, userId])
 }

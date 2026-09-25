@@ -179,4 +179,42 @@ export class ChatGateway implements OnGatewayConnection {
 
 
   // ====== POP-UP Random Question =======
+  @UseGuards(WsJwtGuard)
+  @SubscribeMessage("triggerPopQuestion")
+  async triggerPopQuestion(@ConnectedSocket() client: Socket, @MessageBody() data: { classroomId: string; question: string; answer: string }) {
+    const userId = client.data.user.userId;
+    try {
+      const popQuestion = await this.engagementService.triggerPopQuestion(
+      userId,
+      data.classroomId,
+      data.question,
+      data.answer,
+    );
+      
+      // broadcast it to all students
+      this.server.to(`classroom:${data.classroomId}`).emit("popQuestionStarted", { id: popQuestion.id, question: popQuestion.question });
+
+    } catch (error: any) {
+      client.emit('actionError', { message: error?.message ?? 'Could not start pop question' });
+
+    }
+  }
+
+  @UseGuards(WsJwtGuard)
+  @SubscribeMessage("respondToPopQuestion")
+  async respondToPopQuestion(@ConnectedSocket() client: Socket, @MessageBody() data: { popQuestionId: string; classroomId: string; answer: string }) {
+    const userId = client.data.user.userId;
+    
+     try {
+      await this.engagementService.respondToPopQuestion( userId, data.popQuestionId, data.answer);
+      // Let the teacher's UI update live as responses come in, without polling.
+      
+      this.server
+        .to(`classroom:${data.classroomId}`)
+        .emit("popQuestionResponseReceived", { popQuestionId: data.popQuestionId, userId});
+
+    } catch {
+      // Already responded, or not a member — silently ignore, same pattern as elsewhere
+    }
+  }
 }
