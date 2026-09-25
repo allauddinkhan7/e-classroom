@@ -16,10 +16,8 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { useClassroom } from "@/lib/classrooms/use-classrooms";
 import { useCurrentUser } from "@/lib/auth/use-current-user";
-import { AddStudentsDialog } from "@/components/classrooms/add-students-dialog";
 import { EditClassroomDialog } from "@/components/classrooms/edit-classroom-dialog";
-import { useActiveCall } from "@/lib/meetings/meeting-context";
-import { Button } from "@/components/ui/button";
+import { useActiveCall } from "@/components/meetings/meeting-context";
 import ClassroomSection from "@/components/classrooms/classroom-section";
 
 export default function ClassroomDetailPage() {

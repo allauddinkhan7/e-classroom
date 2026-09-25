@@ -56,10 +56,7 @@ export class ChatGateway implements OnGatewayConnection {
 
   @UseGuards(WsJwtGuard)
   @SubscribeMessage("joinClassroom")
-  async joinClassroom(
-    @ConnectedSocket() client: Socket,
-    @MessageBody() data: { classroomId: string },
-  ) {
+  async joinClassroom( @ConnectedSocket() client: Socket, @MessageBody() data: { classroomId: string }) {
     // @MessageBody is Nestjs decorator that extracts the message body from the incoming WebSocket event in this case, the classroomId that the client wants to join.
     const userId = client.data.user.userId;
     const enrollment = await this.prisma.enrollment.findUnique({
@@ -72,10 +69,7 @@ export class ChatGateway implements OnGatewayConnection {
 
   @UseGuards(WsJwtGuard)
   @SubscribeMessage("sendMessage")
-  async sendMessage(
-    @ConnectedSocket() client: Socket,
-    @MessageBody() data: { classroomId: string; content: string },
-  ) {
+  async sendMessage( @ConnectedSocket() client: Socket, @MessageBody() data: { classroomId: string; content: string }) {
     const userId = client.data.user.userId;
     const enrollment = await this.prisma.enrollment.findUnique({
       where: { userId_classroomId: { userId, classroomId: data.classroomId } },
@@ -97,18 +91,14 @@ export class ChatGateway implements OnGatewayConnection {
     this.server.to(`classroom:${data.classroomId}`).emit("newMessage", message);
   }
 
+
+  // who joins the room?
   @UseGuards(WsJwtGuard)
   @SubscribeMessage("joinConversation")
-  async joinConversation(
-    @ConnectedSocket() client: Socket,
-    @MessageBody() data: { conversationId: string },
-  ) {
+  async joinConversation(@ConnectedSocket() client: Socket, @MessageBody() data: { conversationId: string }) {
     const userId = client.data.user.userId;
     try {
-      await this.conversationsService.assertIsParticipant(
-        userId,
-        data.conversationId,
-      );
+      await this.conversationsService.assertIsParticipant(userId, data.conversationId);
       client.join(`conversation:${data.conversationId}`);
     } catch {
       // not a participant — silently ignore, same pattern as joinClassroom
@@ -117,16 +107,10 @@ export class ChatGateway implements OnGatewayConnection {
 
   @UseGuards(WsJwtGuard)
   @SubscribeMessage("sendDirectMessage")
-  async sendDirectMessage(
-    @ConnectedSocket() client: Socket,
-    @MessageBody() data: { conversationId: string; content: string },
-  ) {
+  async sendDirectMessage(@ConnectedSocket() client: Socket, @MessageBody() data: { conversationId: string; content: string }) {
     const userId = client.data.user.userId;
     try {
-      await this.conversationsService.assertIsParticipant(
-        userId,
-        data.conversationId,
-      );
+      await this.conversationsService.assertIsParticipant( userId, data.conversationId );
     } catch {
       return;
     }
@@ -141,27 +125,33 @@ export class ChatGateway implements OnGatewayConnection {
     });
 
     this.server
-      .to(`conversation:${data.conversationId}`)
-      .emit("newDirectMessage", message);
+      .to(`conversation:${data.conversationId}`) // Send the message only to sockets that have joined this particular conversation room.
+      .emit("newDirectMessage", message);        // Send an event called newDirectMessage to everyone in that room.
   }
 
+
+  // ====== POP-UP Random Attendance =======
+
   @UseGuards(WsJwtGuard)
-  @SubscribeMessage("triggerAttendanceCheck")
-  async triggerAttendanceCheck(
-    @ConnectedSocket() client: Socket,
-    @MessageBody() data: { classroomId: string },
-  ) {
+  @SubscribeMessage("triggerAttendanceCheck") // Backend is listening for this event from a client."
+  async triggerAttendanceCheck(@ConnectedSocket() client: Socket, @MessageBody() data: { classroomId: string }) {
     const userId = client.data.user.userId;
     try {
-      const check = await this.engagementService.triggerAttendanceCheck(
-        userId,
-        data.classroomId,
-      );
+      const check = await this.engagementService.triggerAttendanceCheck(userId, data.classroomId);
+
       // Broadcast to everyone in the classroom room — this is the actual
       // "surprise pop-up" moment students see live.
-      this.server
-        .to(`classroom:${data.classroomId}`)
-        .emit("attendanceCheckStarted", { id: check.id });
+
+      this.server.to(`classroom:${data.classroomId}`).emit("attendanceCheckStarted", { id: check.id });
+      /*
+        this.server is your Socket.IO server.
+        Think of it as the central Socket.IO system that knows about all currently connected users.
+
+        .to() 
+        Send the message only to sockets that have joined this particular classroom
+
+
+      */
     } catch (error: any) {
       client.emit("actionError", {
         message: error?.message ?? "Could not start attendance check",
@@ -171,25 +161,22 @@ export class ChatGateway implements OnGatewayConnection {
 
   @UseGuards(WsJwtGuard)
   @SubscribeMessage("respondToAttendance")
-  async respondToAttendance(
-    @ConnectedSocket() client: Socket,
-    @MessageBody() data: { attendanceCheckId: string; classroomId: string },
-  ) {
+  async respondToAttendance( @ConnectedSocket() client: Socket, @MessageBody() data: { attendanceCheckId: string; classroomId: string }) {
     const userId = client.data.user.userId;
     try {
-      await this.engagementService.respondToAttendance(
-        userId,
-        data.attendanceCheckId,
-      );
+      await this.engagementService.respondToAttendance( userId, data.attendanceCheckId );
       // Let the teacher's UI update live as responses come in, without polling.
+      
       this.server
         .to(`classroom:${data.classroomId}`)
-        .emit("attendanceResponseReceived", {
-          attendanceCheckId: data.attendanceCheckId,
-          userId,
-        });
+        .emit("attendanceResponseReceived", { attendanceCheckId: data.attendanceCheckId, userId });
+
     } catch {
       // Already responded, or not a member — silently ignore, same pattern as elsewhere
     }
   }
+
+
+
+  // ====== POP-UP Random Question =======
 }

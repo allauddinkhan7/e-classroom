@@ -1,16 +1,13 @@
+import { RequireAuth } from "@/components/auth/require-auth";
+
 import { SidebarNav } from "@/components/layout/sidebar-nav";
 import { TopBar } from "@/components/layout/top-bar";
-import { RequireAuth } from "@/lib/auth/require-auth";
-import { ActiveCallOverlay } from "@/lib/meetings/active-call-overlay";
-import { MeetingProvider } from "@/lib/meetings/meeting-context";
-4;
+import { MeetingProvider } from "@/components/meetings/meeting-context";
+import { ActiveCallOverlay } from "@/components/meetings/active-call-overlay";
+import { AttendancePopup } from "@/components/meetings/attendance-popup";
 import { PresenceProvider } from "@/lib/presence/presence-context";
 
-export default function DashboardLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (
     <RequireAuth>
       <MeetingProvider>
@@ -25,6 +22,7 @@ export default function DashboardLayout({
             </div>
           </div>
           <ActiveCallOverlay />
+          <AttendancePopup />
         </PresenceProvider>
       </MeetingProvider>
     </RequireAuth>

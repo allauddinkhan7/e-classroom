@@ -47,8 +47,6 @@ export function useChatSocket(target: ChatTarget) {
     const idKey = target.type === "classroom" ? "classroomId" : "conversationId";
     socketRef.current?.emit(event, { [idKey]: target.id, content });
   }
-  console.log("socketRef ........................", socketRef);
-
 
   return { isConnected, liveMessages, sendMessage };
 }

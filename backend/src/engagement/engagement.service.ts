@@ -17,6 +17,7 @@ export class EngagementService {
     const meeting = await this.prisma.meeting.findFirst({
       where: { classroomId, endedAt: null },
     });
+
     if (!meeting) {
       throw new NotFoundException('No active class session — start the class first');
     }
@@ -56,7 +57,7 @@ export class EngagementService {
     const check = await this.prisma.attendanceCheck.findUnique({
       where: { id: attendanceCheckId },
       include: {
-        meeting: { include: { classroom: { include: { enrollments: { include: { user: true } } } } } },
+        meeting: { include: { classroom: { include: { enrollments: { include: { user: { select: {id: true, fullName: true } } } } } } } },
         responses: { include: { user: { select: { id: true, fullName: true } } } },
       },
     });
@@ -68,10 +69,10 @@ export class EngagementService {
     }
 
     const respondedIds = new Set(check.responses.map((r) => r.userId));
+    // get all student in that class
     const allStudents = check.meeting.classroom.enrollments
       .map((e) => e.user)
       .filter((u) => u.id !== teacherId);
-    console.log("response...............",allStudents)
     return {
       responded: check.responses.map((r) => r.user),
       missing: allStudents.filter((u) => !respondedIds.has(u.id)),

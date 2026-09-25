@@ -2,7 +2,7 @@
 
 import { LiveKitRoom } from "@livekit/components-react";
 import "@livekit/components-styles";
-import { Maximize2, Minimize2, Video, X } from "lucide-react";
+import { Maximize2, Video, X } from "lucide-react";
 import { useActiveCall } from "./meeting-context";
 import { CallStage } from "./call-stage";
 import { CallControls } from "./call-controls";
@@ -22,12 +22,11 @@ export function ActiveCallOverlay() {
       data-lk-theme="default"
     >
       {isMinimized ? (
-        // Small persistent window — bottom-right, real video, stays connected
         <div className="fixed bottom-4 right-4 z-50 w-[380px] overflow-hidden rounded-lg border bg-background shadow-xl">
           <div className="flex items-center justify-between border-b p-2">
             <div className="flex items-center gap-2">
               <Video className="h-4 w-4 text-muted-foreground" />
-              <span className="text-blue-600 truncate text-sm font-medium">
+              <span className="truncate text-sm font-medium text-blue-600">
                 {activeCall.classroomName}
               </span>
             </div>
@@ -54,10 +53,9 @@ export function ActiveCallOverlay() {
           <CallControls />
         </div>
       ) : (
-        // Full-screen expanded call
         <div className="fixed inset-0 z-50 flex flex-col bg-background">
           <div className="flex items-center justify-between border-b p-3">
-            <p className="text-blue-600 text-sm font-medium">{activeCall.classroomName}</p>
+            <p className="text-sm font-medium text-blue-600">{activeCall.classroomName}</p>
           </div>
           <div className="flex-1 overflow-hidden">
             <CallStage />

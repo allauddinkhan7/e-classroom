@@ -8,7 +8,7 @@ export class EngagementController {
   constructor(private readonly engagementService: EngagementService) {}
 
   @Get(':id/results')
-  getResults(@Req() req: any, @Param('id') id: string) {
+  getResults(@Req() req: any, @Param('id') id: string) { // attendanceCheckId
     return this.engagementService.getResults(req.user.userId, id);
   }
 }
