@@ -6,7 +6,8 @@ import { Minimize2, PhoneOff, ClipboardCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useActiveCall } from "./meeting-context";
 import { AttendanceResultsDialog } from "./attendance-results-dialog";
-
+import { AskQuestionDialog } from "./ask-question-dialog";
+import { PopQuestionResultsDialog } from "./pop-question-results-dialog";
 export function CallControls() {
   const { activeCall, leaveCall, endCallForEveryone, toggleMinimize, triggerAttendanceCheck } = useActiveCall();
 
@@ -41,8 +42,13 @@ export function CallControls() {
             Take Attendance
           </Button>
           <AttendanceResultsDialog />
+          <AskQuestionDialog />
+          <PopQuestionResultsDialog />
         </>
       )}
+
+     
+
 
       {activeCall?.isHost ? (
         <Button variant="destructive" className="rounded-full" onClick={endCallForEveryone}>

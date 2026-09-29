@@ -24,11 +24,7 @@ type ActiveCall = {
 type MeetingContextValue = {
   activeCall: ActiveCall | null;
   isMinimized: boolean;
-  startCall: (
-    classroomId: string,
-    classroomName: string,
-    isHost: boolean,
-  ) => void;
+  startCall: (classroomId: string, classroomName: string, isHost: boolean) => void;
   leaveCall: () => void;
   endCallForEveryone: () => void;
   toggleMinimize: () => void;
@@ -36,7 +32,13 @@ type MeetingContextValue = {
   lastAttendanceCheckId: string | null;
   respondToAttendance: () => void;
   triggerAttendanceCheck: () => void;
+  pendingPopQuestion: PendingPopQuestion | null;
+  lastPopQuestionId: string | null;
+  respondToPopQuestion: (answer: string) => void;
+  triggerPopQuestion: (question: string, answer: string) => void;
 };
+
+type PendingPopQuestion = { id: string; question: string };
 
 const MeetingContext = createContext<MeetingContextValue | null>(null);
 
@@ -45,6 +47,8 @@ export function MeetingProvider({ children }: { children: React.ReactNode }) {
   const [isMinimized, setIsMinimized] = useState(false);
   const [pendingAttendanceCheckId, setPendingAttendanceCheckId] = useState<string | null>(null);
   const [lastAttendanceCheckId, setLastAttendanceCheckId] = useState<string | null>(null);
+  const [pendingPopQuestion, setPendingPopQuestion] = useState<PendingPopQuestion | null>(null);
+  const [lastPopQuestionId, setLastPopQuestionId] = useState<string | null>(null);
   const engagementSocketRef = useRef<Socket | null>(null);
   const joinMeeting = useJoinMeeting();
   const endMeeting = useEndMeeting();
@@ -66,6 +70,8 @@ export function MeetingProvider({ children }: { children: React.ReactNode }) {
     setIsMinimized(false);
     setPendingAttendanceCheckId(null);
     setLastAttendanceCheckId(null);
+    setPendingPopQuestion(null);
+    setLastPopQuestionId(null);
   }, []);
 
   const endCallForEveryone = useCallback(() => {
@@ -131,9 +137,32 @@ export function MeetingProvider({ children }: { children: React.ReactNode }) {
     socket.on("attendanceCheckStarted", handleCheckStarted);
     socket.on("attendanceResponseReceived", handleResponseReceived);
 
+
+  // ====== POP-UP Random Attendance =======
+    
+    function handlePopQuestionStarted(data: { id: string; question: string }) {
+      if (activeCall!.isHost) {
+        setLastPopQuestionId(data.id);
+      } else {
+        setPendingPopQuestion({ id: data.id, question: data.question });
+        toast.info("Your teacher asked a question!");
+      }
+    }
+
+    function handlePopQuestionResponseReceived() {
+      if (activeCall!.isHost) {
+        toast.success("A student answered");
+      }
+    }
+
+    socket.on("popQuestionStarted", handlePopQuestionStarted);
+    socket.on("popQuestionResponseReceived", handlePopQuestionResponseReceived);
+
     return () => {
       socket.off("attendanceCheckStarted", handleCheckStarted);
       socket.off("attendanceResponseReceived", handleResponseReceived);
+      socket.off("popQuestionStarted", handlePopQuestionStarted);
+      socket.off("popQuestionResponseReceived", handlePopQuestionResponseReceived);
     };
   }, [activeCall]);
 
@@ -152,6 +181,31 @@ export function MeetingProvider({ children }: { children: React.ReactNode }) {
     engagementSocketRef.current?.emit("triggerAttendanceCheck", { classroomId: activeCall.classroomId });
   }, [activeCall]);
 
+  const respondToPopQuestion = useCallback((answer: string) => {
+    if (!activeCall || !pendingPopQuestion) return;
+    engagementSocketRef.current?.emit("respondToPopQuestion", {
+      popQuestionId: pendingPopQuestion.id,
+      classroomId: activeCall.classroomId,
+      answer,
+    });
+    setPendingPopQuestion(null);
+    toast.success("Answer submitted");
+  },
+  [activeCall, pendingPopQuestion],
+);
+
+  const triggerPopQuestion = useCallback(
+    (question: string, answer: string) => {
+      if (!activeCall) return;
+      engagementSocketRef.current?.emit("triggerPopQuestion", {
+        classroomId: activeCall.classroomId,
+        question,
+        answer,
+      });
+    },
+    [activeCall],
+  );
+
   return (
     <MeetingContext.Provider
       value={{
@@ -165,6 +219,10 @@ export function MeetingProvider({ children }: { children: React.ReactNode }) {
         lastAttendanceCheckId,
         respondToAttendance,
         triggerAttendanceCheck,
+        pendingPopQuestion,
+        lastPopQuestionId,
+        respondToPopQuestion,
+        triggerPopQuestion,
       }}
     >
       {children}

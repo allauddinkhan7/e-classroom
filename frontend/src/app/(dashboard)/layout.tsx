@@ -6,8 +6,13 @@ import { MeetingProvider } from "@/components/meetings/meeting-context";
 import { ActiveCallOverlay } from "@/components/meetings/active-call-overlay";
 import { AttendancePopup } from "@/components/meetings/attendance-popup";
 import { PresenceProvider } from "@/lib/presence/presence-context";
+import { PopQuestionPopup } from "@/components/meetings/pop-question-popup";
 
-export default function DashboardLayout({ children }: { children: React.ReactNode }) {
+export default function DashboardLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <RequireAuth>
       <MeetingProvider>
@@ -23,6 +28,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </div>
           <ActiveCallOverlay />
           <AttendancePopup />
+          <PopQuestionPopup />
         </PresenceProvider>
       </MeetingProvider>
     </RequireAuth>
