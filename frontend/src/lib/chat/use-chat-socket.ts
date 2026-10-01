@@ -32,6 +32,13 @@ export function useChatSocket(target: ChatTarget) {
     });
 
     socket.on("disconnect", () => setIsConnected(false));
+    /** 
+     * prevents a memory/connection leak
+     * if you navigate away from the chat page, React runs this cleanup automatically, closing the socket. Without it,
+     * every time you opened a chat page you'd leave an abandoned connection running forever in the background.
+     * 
+    */
+  
 
     socket.on(messageEvent, (message: ChatMessage) => {
       setLiveMessages((prev) => [...prev, message]);

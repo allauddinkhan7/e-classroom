@@ -6,6 +6,7 @@ import { JwtModule } from "@nestjs/jwt";
 import { RedisModule } from "../redis/redis.module";
 import { PassportModule } from "@nestjs/passport";
 import { JwtStrategy } from "./jwt.strategy";
+import { NotificationsModule } from "../notifications/notifications.module";
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { JwtStrategy } from "./jwt.strategy";
     JwtModule.register({
       secret: process.env.JWT_SECRET,
     }),
+    NotificationsModule
   ],
   
   controllers: [AuthController],

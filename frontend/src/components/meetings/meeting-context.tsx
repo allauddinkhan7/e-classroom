@@ -174,7 +174,7 @@ export function MeetingProvider({ children }: { children: React.ReactNode }) {
     });
     setPendingAttendanceCheckId(null);
     toast.success("Marked present");
-  }, [activeCall, pendingAttendanceCheckId]);
+  }, [activeCall, pendingAttendanceCheckId]); 
 
   const triggerAttendanceCheck = useCallback(() => {
     if (!activeCall) return;
@@ -194,8 +194,7 @@ export function MeetingProvider({ children }: { children: React.ReactNode }) {
   [activeCall, pendingPopQuestion],
 );
 
-  const triggerPopQuestion = useCallback(
-    (question: string, answer: string) => {
+  const triggerPopQuestion = useCallback((question: string, answer: string) => {
       if (!activeCall) return;
       engagementSocketRef.current?.emit("triggerPopQuestion", {
         classroomId: activeCall.classroomId,

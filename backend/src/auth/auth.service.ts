@@ -6,6 +6,7 @@ import { JwtService } from '@nestjs/jwt';
 import { LoginDto } from './dto/login.dto';
 import { RedisService } from '../redis/redis.service';
 import { randomUUID } from 'crypto';
+import { EmailService } from '../notifications/email.service';
 
 const REFRESH_TOKEN_TTL_SECONDS = 7 * 24 * 60 * 60; // 7 days
 
@@ -16,6 +17,8 @@ export class AuthService {
     private readonly usersService: UsersService,
     private readonly jwtService: JwtService,
     private readonly redis: RedisService,
+    private readonly emailService: EmailService
+
   ) {}
 
   async register(dto: RegisterDto) {
@@ -34,6 +37,14 @@ export class AuthService {
     });
 
     const { passwordHash: _, ...safeUser } = user;
+
+    await this.emailService.sendMail(
+      dto.email,
+      'Welcome to E-Classroom',
+      `<p>Hi ${dto.fullName},</p><p>Your account has been created. Welcome aboard!</p>`,
+    );
+
+
     return safeUser;
   }
 
