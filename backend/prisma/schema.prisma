@@ -28,6 +28,7 @@ model User {
   passwordHash  String
   fullName      String
   role          Role
+  emailVerified Boolean   @default(false)
   avatarFileId  String?
   avatarFile    File?    @relation("UserAvatar", fields: [avatarFileId], references: [id])
   uploadedFiles File[]   @relation("FileUploader")

@@ -28,7 +28,7 @@ export function useRegister() {
 
   return useMutation({
     mutationFn: (data: RegisterFormValues) => registerRequest(data),
-    onSuccess: () => {
+    onSuccess: (data) => {
       toast.success("Account created — please log in");
       router.push("/login");
     },

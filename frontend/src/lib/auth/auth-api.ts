@@ -10,3 +10,9 @@ export async function registerRequest(data: RegisterFormValues) {
   const res = await apiClient.post("/auth/register", data);
   return res.data;
 }
+
+export async function verifyEmailRequest(token: string) {
+  const res = await apiClient.post("/auth/verify-email", { token });
+  return res.data as { verified: boolean };
+}
+

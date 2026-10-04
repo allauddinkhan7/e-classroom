@@ -7,6 +7,8 @@ import { RedisModule } from "../redis/redis.module";
 import { PassportModule } from "@nestjs/passport";
 import { JwtStrategy } from "./jwt.strategy";
 import { NotificationsModule } from "../notifications/notifications.module";
+import { EmailVerificationService } from "./email-verification.service";
+import { PasswordResetService } from "./password-reset.service";
 
 @Module({
   imports: [
@@ -22,7 +24,7 @@ import { NotificationsModule } from "../notifications/notifications.module";
   ],
   
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy],
+  providers: [AuthService, JwtStrategy, EmailVerificationService, PasswordResetService],
   exports: [JwtModule, JwtStrategy, PassportModule],
 })
 export class AuthModule {}

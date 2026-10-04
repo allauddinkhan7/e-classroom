@@ -53,26 +53,33 @@ export class EmailService implements OnModuleInit {
   */
 
   async onModuleInit() {
-    // Ethereal generates a free, throwaway inbox on the fly — no signup,
-    // no real email is ever actually delivered anywhere. Perfect for dev.
-    const testAccount = await nodemailer.createTestAccount();
+    if (process.env.EMAIL_PROVIDER === 'brevo') {
+      this.transporter = nodemailer.createTransport({
+        host: 'smtp-relay.brevo.com',
+        port: 587,
+        auth: {
+          user: process.env.BREVO_SMTP_USER,
+          pass: process.env.BREVO_SMTP_KEY,
+        },
+      });
+      this.logger.log('Using Brevo for real email delivery');
+      return;
+    }
 
+    // Dev fallback — Ethereal, unchanged
+    const testAccount = await nodemailer.createTestAccount();
     this.transporter = nodemailer.createTransport({
       host: 'smtp.ethereal.email',
       port: 587,
       secure: false,
-      auth: {
-        user: testAccount.user,
-        pass: testAccount.pass,
-      },
+      auth: { user: testAccount.user, pass: testAccount.pass },
     });
-
     this.logger.log(`Ethereal test inbox ready: ${testAccount.user}`);
   }
 
   async sendMail(to: string, subject: string, html: string) {
     const info = await this.transporter.sendMail({
-      from: '"E-Classroom" <no-reply@eclassroom.dev>',
+      from: `"E-Classroom" <${process.env.BREVO_SENDER_EMAIL || 'no-reply@eclassroom.dev'}>`,
       to,
       subject,
       html,
