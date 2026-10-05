@@ -15,7 +15,7 @@ permissions:
 
 jobs:
   build-backend:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04-arm
     steps:
       - uses: actions/checkout@v4
 
@@ -34,6 +34,7 @@ jobs:
         with:
           context: ./backend
           push: true
+          platforms: linux/arm64
           provenance: false
           sbom: false
           tags: |
@@ -41,7 +42,7 @@ jobs:
             ghcr.io/${{ env.OWNER }}/e-classroom-backend:${{ github.ref_name }}
 
   build-frontend:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04-arm
     steps:
       - uses: actions/checkout@v4
 
@@ -60,6 +61,7 @@ jobs:
         with:
           context: ./frontend
           push: true
+          platforms: linux/arm64
           provenance: false
           sbom: false
           build-args: |
