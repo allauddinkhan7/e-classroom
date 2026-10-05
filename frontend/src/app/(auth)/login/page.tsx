@@ -39,7 +39,11 @@ export default function LoginPage() {
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <div className="space-y-2">
           <Label htmlFor="email">Email</Label>
-          <Input id="email" placeholder="you@example.com" {...register("email")} />
+          <Input
+            id="email"
+            placeholder="you@example.com"
+            {...register("email")}
+          />
           {errors.email && (
             <p className="text-sm text-destructive">{errors.email.message}</p>
           )}
@@ -54,7 +58,9 @@ export default function LoginPage() {
             {...register("password")}
           />
           {errors.password && (
-            <p className="text-sm text-destructive">{errors.password.message}</p>
+            <p className="text-sm text-destructive">
+              {errors.password.message}
+            </p>
           )}
         </div>
 
@@ -62,16 +68,17 @@ export default function LoginPage() {
           {login.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
           {login.isPending ? "Logging in..." : "Log in"}
         </Button>
-        <p className="text-right text-sm">
-          <Link href="/forgot-password" className="text-muted-foreground underline underline-offset-4">
-            Forgot password?
-          </Link>
-        </p>
+        <Button variant="outline">
+          <Link href="/forgot-password">Request new link</Link>
+        </Button>
       </form>
 
       <p className="text-center text-sm text-muted-foreground">
         Don&apos;t have an account?{" "}
-        <Link href="/register" className="font-medium text-foreground underline underline-offset-4">
+        <Link
+          href="/register"
+          className="font-medium text-foreground underline underline-offset-4"
+        >
           Sign up
         </Link>
       </p>

@@ -4,15 +4,13 @@ import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { CheckCircle2, XCircle, Loader2 } from "lucide-react";
-import { buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import { verifyEmailRequest } from "@/lib/auth/auth-api";
 
-function VerifyEmailSatus() {
+function VerifyEmailForm() {
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
-  const [status, setStatus] = useState<"loading" | "success" | "error">(
-    "loading",
-  );
+  const [status, setStatus] = useState<"loading" | "success" | "error">("loading");
 
   useEffect(() => {
     if (!token) {
@@ -30,9 +28,7 @@ function VerifyEmailSatus() {
       {status === "loading" && (
         <>
           <Loader2 className="mx-auto h-10 w-10 animate-spin text-muted-foreground" />
-          <p className="text-sm text-muted-foreground">
-            Verifying your email...
-          </p>
+          <p className="text-sm text-muted-foreground">Verifying your email...</p>
         </>
       )}
 
@@ -41,13 +37,11 @@ function VerifyEmailSatus() {
           <CheckCircle2 className="mx-auto h-10 w-10 text-emerald-600" />
           <div className="space-y-1">
             <h1 className="text-xl font-semibold">Email verified</h1>
-            <p className="text-sm text-muted-foreground">
-              Your account is now verified.
-            </p>
+            <p className="text-sm text-muted-foreground">Your account is now verified.</p>
           </div>
-          <Link href="/login" className={buttonVariants()}>
-            Go to login
-          </Link>
+          <Button variant="outline">
+            <Link href="/login">Go to login</Link>
+          </Button>
         </>
       )}
 
@@ -60,12 +54,9 @@ function VerifyEmailSatus() {
               This link is invalid or has expired.
             </p>
           </div>
-          <Link
-            href="/login"
-            className={buttonVariants({ variant: "outline" })}
-          >
-            Back to login
-          </Link>
+          <Button variant="outline">
+            <Link href="/login">Back to login</Link>
+          </Button>
         </>
       )}
     </div>
@@ -73,7 +64,9 @@ function VerifyEmailSatus() {
 }
 
 export default function VerifyEmailPage() {
-  <Suspense fallback={<div>Loading...</div>}>
-    <VerifyEmailSatus />
-  </Suspense>;
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <VerifyEmailForm />
+    </Suspense>
+  );
 }
