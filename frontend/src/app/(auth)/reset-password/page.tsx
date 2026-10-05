@@ -1,10 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
 import { Loader2, CheckCircle2, XCircle } from "lucide-react";
 import { z } from "zod";
 import { toast } from "sonner";
@@ -13,13 +12,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { resetPasswordRequest } from "@/lib/auth/auth-api";
+import { useForm } from "react-hook-form";
 
 const schema = z.object({
   newPassword: z.string().min(8, "Password must be at least 8 characters"),
 });
 type FormValues = z.infer<typeof schema>;
 
-export default function ResetPasswordPage() {
+function ResetPasswordForm() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const token = searchParams.get("token");
@@ -29,7 +29,10 @@ export default function ResetPasswordPage() {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
-  } = useForm<FormValues>({ resolver: zodResolver(schema), defaultValues: { newPassword: "" } });
+  } = useForm<FormValues>({
+    resolver: zodResolver(schema),
+    defaultValues: { newPassword: "" },
+  });
 
   async function onSubmit(values: FormValues) {
     if (!token) {
@@ -69,7 +72,9 @@ export default function ResetPasswordPage() {
         <CheckCircle2 className="mx-auto h-10 w-10 text-emerald-600" />
         <div className="space-y-1">
           <h1 className="text-xl font-semibold">Password updated</h1>
-          <p className="text-sm text-muted-foreground">Redirecting you to login...</p>
+          <p className="text-sm text-muted-foreground">
+            Redirecting you to login...
+          </p>
         </div>
       </div>
     );
@@ -78,8 +83,12 @@ export default function ResetPasswordPage() {
   return (
     <div className="space-y-6">
       <div className="space-y-1 text-center">
-        <h1 className="text-2xl font-semibold tracking-tight">Reset your password</h1>
-        <p className="text-sm text-muted-foreground">Choose a new password below.</p>
+        <h1 className="text-2xl font-semibold tracking-tight">
+          Reset your password
+        </h1>
+        <p className="text-sm text-muted-foreground">
+          Choose a new password below.
+        </p>
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
@@ -92,7 +101,9 @@ export default function ResetPasswordPage() {
             {...register("newPassword")}
           />
           {errors.newPassword && (
-            <p className="text-sm text-destructive">{errors.newPassword.message}</p>
+            <p className="text-sm text-destructive">
+              {errors.newPassword.message}
+            </p>
           )}
         </div>
 
@@ -102,5 +113,12 @@ export default function ResetPasswordPage() {
         </Button>
       </form>
     </div>
+  );
+}
+export default function ResetPasswordPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <ResetPasswordForm />
+    </Suspense>
   );
 }
