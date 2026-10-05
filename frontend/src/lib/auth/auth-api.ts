@@ -16,3 +16,12 @@ export async function verifyEmailRequest(token: string) {
   return res.data as { verified: boolean };
 }
 
+export async function requestPasswordResetRequest(email: string) {
+  const res = await apiClient.post("/auth/request-password-reset", { email });
+  return res.data as { message: string };
+}
+
+export async function resetPasswordRequest(token: string, newPassword: string) {
+  const res = await apiClient.post("/auth/reset-password", { token, newPassword });
+  return res.data as { message: string };
+}

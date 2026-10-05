@@ -62,6 +62,11 @@ export default function LoginPage() {
           {login.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
           {login.isPending ? "Logging in..." : "Log in"}
         </Button>
+        <p className="text-right text-sm">
+          <Link href="/forgot-password" className="text-muted-foreground underline underline-offset-4">
+            Forgot password?
+          </Link>
+        </p>
       </form>
 
       <p className="text-center text-sm text-muted-foreground">
