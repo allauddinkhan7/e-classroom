@@ -22,13 +22,13 @@ export default function ForgotPasswordPage() {
   const {register, handleSubmit, formState: { errors, isSubmitting }} = useForm<FormValues>({ resolver: zodResolver(schema), defaultValues: { email: "" } });
 
   async function onSubmit(values: FormValues) {
-  try {
-    await requestPasswordResetRequest(values.email);
-    setSent(true);
-  } catch (error) {
-    console.error(error);
+    try {
+      await requestPasswordResetRequest(values.email);
+      setSent(true);
+    } catch (error) {
+      console.error(error);
+    }
   }
-}
 
   if (sent) {
     return (

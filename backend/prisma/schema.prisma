@@ -28,7 +28,7 @@ model User {
   passwordHash  String
   fullName      String
   role          Role
-  emailVerified Boolean   @default(false)
+  emailVerified Boolean  @default(false)
   avatarFileId  String?
   avatarFile    File?    @relation("UserAvatar", fields: [avatarFileId], references: [id])
   uploadedFiles File[]   @relation("FileUploader")
@@ -55,13 +55,14 @@ model Classroom {
   creator   User          @relation("ClassroomCreator", fields: [createdBy], references: [id])
   createdAt DateTime      @default(now())
 
-  enrollments Enrollment[]
-  assignments Assignment[]
-  materials   Material[]
-  groups      Group[]
-  notes       Note[]
-  messages    Message[]
-  meetings    Meeting[]
+  enrollments       Enrollment[]
+  assignments       Assignment[]
+  materials         Material[]
+  groups            Group[]
+  notes             Note[]
+  messages          Message[]
+  meetings          Meeting[]
+  scheduledSessions ScheduledSession[]
 }
 
 model Enrollment {
@@ -279,4 +280,15 @@ model File {
   submissions    Submission[]
   materials      Material[]
   assignments    Assignment[]
+}
+
+model ScheduledSession {
+  id           String   @id @default(uuid())
+  classroomId  String
+  scheduledAt  DateTime
+  createdBy    String
+  reminderSent Boolean  @default(false)
+  createdAt    DateTime @default(now())
+
+  classroom Classroom @relation(fields: [classroomId], references: [id])
 }

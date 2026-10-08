@@ -14,9 +14,10 @@ import { ChatModule } from "../chat/chat.module";
 import { ConversationsModule } from "../conversations/conversations.module";
 import { EngagementModule } from "../engagement/engagement.module";
 import { NotificationsModule } from "../notifications/notifications.module";
+import { SchedulingModule } from "../scheduling/scheduling.module";
 
 @Module({
-  imports: [PrismaModule, RedisModule, UsersModule, AuthModule, ClassroomModule, AssignmentsModule, FilesModule, MaterialsModule, NotesModule, MeetingsModule, ChatModule, ConversationsModule, EngagementModule, NotificationsModule],
+  imports: [PrismaModule, RedisModule, UsersModule, AuthModule, ClassroomModule, AssignmentsModule, FilesModule, MaterialsModule, NotesModule, MeetingsModule, ChatModule, ConversationsModule, EngagementModule, NotificationsModule, SchedulingModule],
   controllers: [AppController],
 })
 export class AppModule {}

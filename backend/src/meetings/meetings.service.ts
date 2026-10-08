@@ -63,7 +63,6 @@ export class MeetingsService {
     }
 
     if (meeting.endedAt) {
-      console.log("meeting.endedAt");
       return { ended: true };
     }
 

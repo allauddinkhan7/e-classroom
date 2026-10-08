@@ -56,7 +56,7 @@ export class EmailService implements OnModuleInit {
     if (process.env.EMAIL_PROVIDER === 'brevo') {
       this.transporter = nodemailer.createTransport({
         host: 'smtp-relay.brevo.com',
-        port: 587,
+        port: 2525,
         auth: {
           user: process.env.BREVO_SMTP_USER,
           pass: process.env.BREVO_SMTP_KEY,
