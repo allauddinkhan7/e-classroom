@@ -11,6 +11,7 @@ import {
   NotebookPen,
   Users2,
   MessageSquare,
+  CalendarClock,
 } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
@@ -106,6 +107,13 @@ export default function ClassroomDetailPage() {
       description: "Message everyone in this classroom.",
       icon: MessageSquare, // import from lucide-react
       gradient: "from-violet-600 to-purple-900",
+    },
+    {
+      slug: "schedule",
+      title: "Schedule",
+      description: "Plan upcoming live classes and remind students.",
+      icon: CalendarClock,
+      gradient: "from-amber-500 to-orange-700",
     },
   ];
 
