@@ -113,7 +113,7 @@ export default function ClassroomDetailPage() {
       title: "Schedule",
       description: "Plan upcoming live classes and remind students.",
       icon: CalendarClock,
-      gradient: "from-amber-500 to-orange-700",
+      gradient: "from-blue-600 to-blue-800",
     },
   ];
 

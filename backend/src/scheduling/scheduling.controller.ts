@@ -8,10 +8,11 @@ import { ScheduleClassDto } from './dto/schedule-class.dto';
 export class SchedulingController {
   constructor(private readonly schedulingService: SchedulingService) {}
 
-  @Post('classrooms/:classroomId/schedule')
-  schedule(@Req() req: any, @Param('classroomId') classroomId: string, @Body() dto: ScheduleClassDto) {
-    return this.schedulingService.scheduleClass(req.user.userId, classroomId, dto.scheduledAt);
-  }
+@Post('classrooms/:classroomId/schedule')
+schedule(@Req() req: any, @Param('classroomId') classroomId: string, @Body() dto: ScheduleClassDto) {
+  console.log("schedule controller", req.user.userId, classroomId, dto.scheduledAt);
+  return this.schedulingService.scheduleClass(req.user.userId, classroomId, dto.scheduledAt);
+}
 
   @Get('classrooms/:classroomId/scheduled-sessions')
   findUpcoming(@Req() req: any, @Param('classroomId') classroomId: string) {
